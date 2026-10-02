@@ -1,0 +1,26 @@
+import type { Simulation } from '../engine/simulation';
+import { M } from './materials';
+export function loadScene(sim: Simulation, preset: string) {
+    sim.clear();
+    // Generate shapes directly at the active resolution, including curved edges.
+    const sx = sim.width / 240, sy = sim.height / 144;
+    const rect = (x: number, y: number, w: number, h: number, t: number) => { for (let yy = Math.floor(y * sy); yy < Math.ceil((y + h) * sy); yy++) for (let xx = Math.floor(x * sx); xx < Math.ceil((x + w) * sx); xx++) sim.set(xx, yy, t); };
+    if (preset === 'empty') return;
+    if (preset === 'fire') { rect(40, 105, 160, 4, M.Stone); rect(65, 70, 110, 35, M.Wood); rect(95, 64, 40, 6, M.Lava); return; }
+    if (preset === 'water') { rect(50, 110, 140, 5, M.Stone); rect(50, 55, 4, 55, M.Stone); rect(186, 55, 4, 55, M.Stone); rect(54, 90, 132, 20, M.Water); rect(95, 42, 45, 12, M.Lava); return; }
+    if (preset === 'fracture') { rect(110, 110, 20, 34, M.Stone); rect(118, 75, 4, 35, M.Wood); rect(75, 70, 90, 5, M.Wood); rect(95, 58, 5, 10, M.Acid); return; }
+    if (preset === 'float') { rect(20, 140, 200, 4, M.Stone); rect(20, 62, 4, 78, M.Stone); rect(216, 62, 4, 78, M.Stone); rect(24, 90, 192, 50, M.Water); rect(55, 65, 24, 12, M.Wood); rect(105, 62, 20, 16, M.Ice); rect(160, 65, 16, 16, M.Glass); return; }
+    if (preset === 'heat') { rect(25, 140, 190, 4, M.Stone); rect(44, 126, 1, 14, M.Glass); rect(80, 126, 1, 14, M.Glass); rect(45, 130, 35, 10, M.Lava); rect(85, 128, 35, 12, M.Ice); rect(170, 128, 25, 12, M.Ice); return; }
+    if (preset === 'tip') { rect(20, 140, 200, 4, M.Concrete); rect(95, 100, 10, 40, M.Concrete); rect(95, 88, 50, 12, M.Wood); rect(40, 134, 20, 6, M.Grass); return; }
+    if (preset === 'stress') { rect(20, 140, 200, 4, M.Stone); rect(118, 90, 2, 50, M.Concrete); rect(85, 78, 70, 12, M.Concrete); return; }
+    if (preset === 'shatter') { rect(20, 140, 200, 4, M.Concrete); rect(45, 50, 18, 18, M.Glass); rect(145, 125, 40, 15, M.Glass); rect(150, 50, 18, 18, M.Glass); return; }
+    for (let x = 0; x < sim.width; x++) {
+      const ground = Math.round((117 + 6 * Math.sin(x / sx / 17) + 3 * Math.cos(x / sx / 9)) * sy);
+      for (let y = ground; y < sim.height; y++) sim.set(x, y, y < ground + 3 * sy ? M.Sand : M.Stone);
+      if (x / sx > 10 && x / sx < 88) for (let y = Math.floor(105 * sy); y < ground; y++) sim.set(x, y, M.Water);
+    }
+    rect(107, 89, 5, 30, M.Wood); rect(161, 89, 5, 29, M.Wood); rect(103, 88, 67, 5, M.Wood);
+    rect(125, 46, 22, 8, M.Lava); rect(202, 99, 15, 14, M.Ice);
+    for (let y = Math.floor(65 * sy); y < 108 * sy; y++) for (let x = Math.floor(28 * sx); x < 65 * sx; x++) if ((x / sx - 46) ** 2 + (y / sy - 86) ** 2 < 260) sim.set(x, y, M.Wood);
+    rect(44, 89, 5, 27, M.Wood);
+  }

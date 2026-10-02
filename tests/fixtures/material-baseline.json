@@ -1,0 +1,381 @@
+[
+  {
+    "name": "landscape",
+    "preset": "landscape",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "8e096f1007d2cdc2e02f0ad2b48bb39b7ef194639a39db551c128059b38a8cbd",
+      "life": "a4f6df4858aac6a51f91e350721e8d1ab133d262b98c5efa2d032539505ed986",
+      "temperature": "4a7cf7188528e66c3891ccab85e7cbb50cf304fad70695740949f4493b7b1315",
+      "uv": "26cf02e154f17ac74db820d6627b4363494ad91442995146b945d6c7dbc87c40",
+      "counts": {
+        "Smoke": 142,
+        "Steam": 30,
+        "Fire": 46,
+        "Wood": 245,
+        "Water": 260,
+        "Sand": 139,
+        "Stone": 1513,
+        "Lava": 42,
+        "Glass": 47
+      },
+      "reactions": {
+        "ignition": 213,
+        "cooling": 12,
+        "melting": 70,
+        "glass": 47,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.3369142224546522
+    }
+  },
+  {
+    "name": "fire",
+    "preset": "fire",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "4eb096f4b04aa838a3f33c962c98f204417b193fadd2bdf525f4c722df4edeb2",
+      "life": "b328459d8dd614e420ab41edc1cbc99636fa79c8d3ec03ec7700a58c1037e46c",
+      "temperature": "e8ceadc5a77fa2307bb81d9209c3e9099824bd4a25602451bf53948e123351c0",
+      "uv": "2d1f77b55e320a1736efa42df3b6bedbcabeb02d593cc200dec8503ca26d7e06",
+      "counts": {
+        "Smoke": 2890,
+        "Fire": 325,
+        "Lava": 80,
+        "Stone": 192
+      },
+      "reactions": {
+        "ignition": 1040,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.6461814155336469
+    }
+  },
+  {
+    "name": "water",
+    "preset": "water",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "a39f0abfbfdc9714dfb0f25cf49f484d8db6ab5b1f36444b70d609e52191dd95",
+      "life": "98c1c63e9230e137e11ac0de6f8f6555869d253a7d8a9d448fc691063aca215a",
+      "temperature": "d712c777c7df222bd69427eee88db571fc54987b2ed8827d43b1925ae57dc1cc",
+      "uv": "b01e1b92bbcda58f32ce7d4ecee1b99486117f15bb6895f5d7db2a2a00887f98",
+      "counts": {
+        "Steam": 100,
+        "Stone": 392,
+        "Lava": 44,
+        "Water": 656
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 100,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.10927278781309724
+    }
+  },
+  {
+    "name": "fracture",
+    "preset": "fracture",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "8596f6856992eb8a82b4715cb47ef4bf3138a32ea3a2d782188182f395d2c9a9",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "1c0273095382988333e2f2b5ae487cea460737ed9be65cbad9c5de537f95bf75",
+      "uv": "3031982a7037015493278a1e960b6d6e4184046295f996acfb580c812c6ec2e8",
+      "counts": {
+        "Wood": 176,
+        "Stone": 182
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 16,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.6516722498927265
+    }
+  },
+  {
+    "name": "float",
+    "preset": "float",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "9c246a2423648185def0cae77504b20e748b2f4579d75b7b3386a62880e12537",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "ffccc27a6dfefbb9130cab526e9031aeea6c431ad4fa212a87d8de19752595d1",
+      "uv": "1ca830c3e82655ebef92a48cc34bbc06def41368d5c88190f5201b9c7f763165",
+      "counts": {
+        "Stone": 304,
+        "Wood": 90,
+        "Water": 2652,
+        "Ice": 88,
+        "Glass": 77
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.26978705474175513
+    }
+  },
+  {
+    "name": "heat",
+    "preset": "heat",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "77efee0ce7c41fcb17c8ccf1f3cecff10fc98f17de4ca313ac7ab1a890067908",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "8536f45708138ee62ebf3d8455370bad56f330452446ce05f1b0244af0a9efbc",
+      "uv": "5cb3148daa6bae81010d970b39fc5d687bdb800c478be153aff42cdffbd1eac8",
+      "counts": {
+        "Glass": 20,
+        "Lava": 112,
+        "Water": 182,
+        "Ice": 34,
+        "Stone": 188
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 182,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.19782836898230016
+    }
+  },
+  {
+    "name": "tip",
+    "preset": "tip",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "31e01549e6382114f0c4dcc6f883c365b3bb81e83fa008db2069b443daa3827d",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "1c0273095382988333e2f2b5ae487cea460737ed9be65cbad9c5de537f95bf75",
+      "uv": "60b6ad9d60d7b651dccb6312dd0f70617a19fe11e4435bf034f52c044984b0f5",
+      "counts": {
+        "Wood": 180,
+        "Concrete": 336,
+        "Grass": 40
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.2523451747838408
+    }
+  },
+  {
+    "name": "stress",
+    "preset": "stress",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "b1153b7574546d25400a910f22fbefd99e213566a423b5535e0eee0260dff894",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "1c0273095382988333e2f2b5ae487cea460737ed9be65cbad9c5de537f95bf75",
+      "uv": "dfb3870f5a501ffc767ea63f1d763c628f4e9461d55c0f52a3558a8968084bef",
+      "counts": {
+        "Rubble": 32,
+        "Concrete": 226,
+        "Stone": 239
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 32,
+        "shattering": 0
+      },
+      "nextRandom": 0.9732862974051386
+    }
+  },
+  {
+    "name": "shatter",
+    "preset": "shatter",
+    "width": 96,
+    "height": 96,
+    "ticks": 180,
+    "placements": [],
+    "expected": {
+      "cells": "1e7bfef74b5a06126f8c8283d04311b337ff376fb054a516c1a3d6fc638f7cd4",
+      "life": "f7b586904e3678145aa47e4232587c913139cef0102d6d8e9276fc80c35cbad3",
+      "temperature": "1c0273095382988333e2f2b5ae487cea460737ed9be65cbad9c5de537f95bf75",
+      "uv": "54c68001ecfd87650de1795fa5defa08319c3827cd385a4300f93188cda64e21",
+      "counts": {
+        "Glass shards": 384,
+        "Concrete": 224
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 384
+      },
+      "nextRandom": 0.1801058000419289
+    }
+  },
+  {
+    "name": "saltwater-contact",
+    "preset": "empty",
+    "width": 20,
+    "height": 20,
+    "ticks": 20,
+    "placements": [
+      [
+        10,
+        19,
+        5
+      ],
+      [
+        11,
+        19,
+        12
+      ],
+      [
+        9,
+        19,
+        1
+      ],
+      [
+        8,
+        19,
+        7
+      ]
+    ],
+    "expected": {
+      "cells": "04101d1414f749dd20a1fc529d6b2433b5610b46dd80cf20c05762bcf26bc920",
+      "life": "feb933c63af4a3db534a5ba313cc1a4a48af7af85a0cc477d424295c590d424f",
+      "temperature": "6f86f21b117d21fe76808fb00ce1dc6b2099248f308bb6a220061843fd616348",
+      "uv": "f9b8aa74eee103d51e9c5032bf945a714f9773267b85319c7ba24f08eeac6654",
+      "counts": {
+        "Steam": 1,
+        "Oil": 1,
+        "Glass": 1,
+        "Stone": 1,
+        "Salt": 1
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 1,
+        "melting": 0,
+        "glass": 1,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.4302643754053861
+    }
+  },
+  {
+    "name": "gas-lifetimes",
+    "preset": "empty",
+    "width": 40,
+    "height": 40,
+    "ticks": 30,
+    "placements": [
+      [
+        10,
+        35,
+        6
+      ],
+      [
+        20,
+        35,
+        9
+      ],
+      [
+        30,
+        35,
+        10
+      ]
+    ],
+    "expected": {
+      "cells": "8b7ba45fd87f565f6165eeec0ee8db9da8e2258a9da695cd532a896b94cfea44",
+      "life": "4c9ff060667680326f2570c010136dd2cce0b3578a9e5e78e8e560d2c840237d",
+      "temperature": "62c24407986fb3dde45107d279b931d0a819e8f5a5dda875a4fd8308f4396576",
+      "uv": "b2f30bc8dda2400b296565402632422f6d304fc0bb548c40f33d1c949a06e109",
+      "counts": {
+        "Fire": 1,
+        "Smoke": 3,
+        "Steam": 1
+      },
+      "reactions": {
+        "ignition": 0,
+        "cooling": 0,
+        "melting": 0,
+        "glass": 0,
+        "dissolving": 0,
+        "erosion": 0,
+        "fracture": 0,
+        "shattering": 0
+      },
+      "nextRandom": 0.23340824991464615
+    }
+  }
+]

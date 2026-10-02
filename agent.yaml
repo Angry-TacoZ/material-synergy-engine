@@ -1,0 +1,9 @@
+spec_version: "0.1.0"
+name: material-synergy-engine
+version: 0.1.0
+description: Engineering agent for the Material Synergy Engine repository.
+skills:
+  - api-integration-security
+  - interaction-usability
+  - security-relevant-change
+  - visual-diagnosis
