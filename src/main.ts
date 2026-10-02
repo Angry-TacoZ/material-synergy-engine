@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Simulation, materials, M } from './simulation';
 import { MaterialRenderer } from './rendering';
+import { screenToWorld, zoomAt, type Point, type Viewport } from './demo/viewport';
 import './style.css';
 
 const CELL_SIZE = 1;
@@ -15,10 +16,10 @@ app.innerHTML = `
     <div class="workspace-heading"><div><div class="eyebrow">THE PARTICLE LAB</div><h1>Matter in motion<span>.</span></h1></div><div class="live-status"><span id="status-dot"></span><span id="status">Simulation running</span></div></div>
     <div class="lab">
       <aside class="palette"><div class="panel-title">Materials <span>14</span></div><label class="search"><span>⌕</span><input id="search" type="search" placeholder="Find a material" aria-label="Find a material"></label><div class="filters" role="group" aria-label="Material categories"><button class="active" data-filter="All">All</button><button data-filter="Solids">Solids</button><button data-filter="Liquids">Liquids</button><button data-filter="Other">Other</button></div><div id="materials"></div><div class="palette-foot">Pick a material.<br>Paint something unexpected.</div></aside>
-      <section class="world"><div class="world-toolbar"><div class="world-label"><span>◈</span> Workspace <span class="dimensions">240 × 144</span></div><div class="toolbar-actions"><button id="pause" aria-label="Pause simulation">Ⅱ <span>Pause</span></button><button id="step" title="Advance one simulation tick">↦ <span>Step</span></button><button id="fullscreen" aria-label="Toggle fullscreen">⛶</button></div></div><div id="game" tabindex="0" role="application" aria-label="Particle workspace. Drag to paint. Arrow keys move brush; Enter paints. Space pauses."></div><div class="world-bottom"><span><i class="tiny-dot"></i> <span id="particle-count">0</span> particles</span><span id="hover-material">Move your brush to explore</span><span id="fps">60 FPS</span></div><div class="brush-tools"><div class="tool-switch"><button id="paint" class="active" aria-pressed="true">✎ Paint</button><button id="erase" aria-pressed="false">▱ Erase</button></div><label class="brush-size">Brush <input id="brush" type="range" min="1" max="28" value="8"><output id="brush-value">8</output></label><label class="speed-label">Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><button id="clear">Clear</button></div><div class="examples"><span>TRY A SCENE</span><button data-scene="landscape">Little world <span>↗</span></button><button data-scene="fire">Lava & wood <span>↗</span></button><button data-scene="water">Cooling lava <span>↗</span></button><button data-scene="empty">Blank canvas <span>＋</span></button></div></section>
+      <section class="world"><div class="world-toolbar"><div class="world-label"><span>◈</span> Workspace <span class="dimensions">240 × 144</span></div><div class="toolbar-actions"><button id="zoom-reset" aria-label="Reset zoom" title="Mouse wheel: zoom at cursor · Click: reset zoom">100%</button><button id="pause" aria-label="Pause simulation">Ⅱ <span>Pause</span></button><button id="step" title="Advance one simulation tick">↦ <span>Step</span></button><button id="fullscreen" aria-label="Toggle fullscreen">⛶</button></div></div><div id="game" tabindex="0" role="application" aria-label="Particle workspace. Drag to paint; mouse wheel zooms at cursor. Arrow keys move brush; Enter paints. Space pauses."></div><div class="world-bottom"><span><i class="tiny-dot"></i> <span id="particle-count">0</span> particles</span><span id="hover-material">Move your brush to explore</span><span id="fps">60 FPS</span></div><div class="brush-tools"><div class="tool-switch"><button id="paint" class="active" aria-pressed="true">✎ Paint</button><button id="erase" aria-pressed="false">▱ Erase</button></div><label class="brush-size">Brush <input id="brush" type="range" min="1" max="28" value="8"><output id="brush-value">8</output></label><label class="speed-label">Speed <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option></select></label><button id="clear">Clear</button></div><div class="examples"><span>TRY A SCENE</span><button data-scene="landscape">Little world <span>↗</span></button><button data-scene="fire">Lava & wood <span>↗</span></button><button data-scene="water">Cooling lava <span>↗</span></button><button data-scene="empty">Blank canvas <span>＋</span></button></div></section>
       <aside class="inspector"><div class="eyebrow">UNDER THE MICROSCOPE</div><div id="material-detail"></div><div class="tip"><span>↗</span><div><strong>Start a chain reaction</strong><p>Build with wood, add lava above it, and watch the fire spread.</p></div></div><div class="reaction-log"><div class="panel-title">Observed reactions</div><div id="reactions">Your experiments will appear here.</div></div></aside>
     </div>
-    <footer><span><kbd>Drag</kbd> paint <span class="separator">/</span> <kbd>Right click</kbd> erase <span class="separator">/</span> <kbd>Space</kbd> pause <span class="separator">/</span> <kbd>[</kbd> <kbd>]</kbd> brush</span><span>Simplified material behavior, made for exploration.</span></footer>
+    <footer><span><kbd>Drag</kbd> paint <span class="separator">/</span> <kbd>Right click</kbd> erase <span class="separator">/</span> <kbd>Wheel</kbd> zoom <span class="separator">/</span> <kbd>Space</kbd> pause <span class="separator">/</span> <kbd>[</kbd> <kbd>]</kbd> brush</span><span>Simplified material behavior, made for exploration.</span></footer>
   </main>`;
 
 const el = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id) as T;
@@ -94,6 +95,15 @@ class SandboxScene extends Phaser.Scene {
   private lastPoint: {x: number; y: number} | null = null;
   private drawnRevision = -1;
   private drawnTick = -1;
+  private viewport: Viewport = { zoom: 1, scrollX: 0, scrollY: 0 };
+  private pointerCell(point: Point) {
+    const world = screenToWorld(point, this.viewport, sim.width, sim.height);
+    return { x: Phaser.Math.Clamp(Math.floor(world.x), 0, sim.width - 1), y: Phaser.Math.Clamp(Math.floor(world.y), 0, sim.height - 1) };
+  }
+  private applyViewport() {
+    this.cameras.main.setZoom(this.viewport.zoom).setScroll(this.viewport.scrollX, this.viewport.scrollY);
+    el('zoom-reset').textContent = `${Math.round(this.viewport.zoom * 100)}%`;
+  }
   create() {
     this.texture = this.textures.createCanvas('matter', sim.width, sim.height)!;
     this.imageData = this.texture.context.createImageData(sim.width, sim.height);
@@ -104,19 +114,28 @@ class SandboxScene extends Phaser.Scene {
     this.add.image(0, 0, 'matter').setOrigin(0).setScale(CELL_SIZE);
     this.outline = this.add.graphics();
     this.input.mouse?.disableContextMenu();
-    this.input.on('pointerdown', (p: Phaser.Input.Pointer) => { el('game').focus(); this.lastPoint = null; cursor = { x: Math.floor(p.x / CELL_SIZE), y: Math.floor(p.y / CELL_SIZE) }; sim.paint(cursor.x, cursor.y, brush, erasing || p.rightButtonDown() ? 0 : selected); this.draw(); updateStats(); });
+    this.game.canvas.addEventListener('wheel', event => {
+      event.preventDefault();
+      const bounds = this.game.canvas.getBoundingClientRect();
+      const point = { x: (event.clientX - bounds.left) * sim.width / bounds.width, y: (event.clientY - bounds.top) * sim.height / bounds.height };
+      this.viewport = zoomAt(this.viewport, point, event.deltaY, sim.width, sim.height);
+      this.applyViewport();
+      this.lastPoint = null; keyboardCursor = false; cursor = this.pointerCell(point);
+    }, { passive: false });
+    el('zoom-reset').onclick = () => { this.viewport = { zoom: 1, scrollX: 0, scrollY: 0 }; this.applyViewport(); this.lastPoint = null; cursor = this.pointerCell(this.input.activePointer); };
+    this.input.on('pointerdown', (p: Phaser.Input.Pointer) => { el('game').focus(); this.lastPoint = null; cursor = this.pointerCell(p); sim.paint(cursor.x, cursor.y, brush, erasing || p.rightButtonDown() ? 0 : selected); this.draw(); updateStats(); });
     this.input.on('pointerup', () => this.lastPoint = null);
-    this.input.on('pointermove', (p: Phaser.Input.Pointer) => { keyboardCursor = false; cursor = { x: Math.floor(p.x / CELL_SIZE), y: Math.floor(p.y / CELL_SIZE) }; });
+    this.input.on('pointermove', (p: Phaser.Input.Pointer) => { keyboardCursor = false; cursor = this.pointerCell(p); });
     this.input.on('gameout', () => this.lastPoint = null);
     sim.load('landscape');
     this.draw();
-    window.render_game_to_text = () => JSON.stringify({ coordinates: `origin top-left; x right; y down; ${sim.width}×${sim.height} cells`, simulationHz: 60, massUnits: 'one water cell = 1 u', bodies: sim.bodySummaries(), paused, selected: materials[selected].name, erasing, brush, speed, ticks: sim.ticks, counts: sim.counts(), reactions: sim.reactions, cursor, temperature: sim.temperatureAt(cursor.x, cursor.y) });
+    window.render_game_to_text = () => JSON.stringify({ coordinates: `origin top-left; x right; y down; ${sim.width}×${sim.height} cells`, simulationHz: 60, massUnits: 'one water cell = 1 u', bodies: sim.bodySummaries(), paused, selected: materials[selected].name, erasing, brush, speed, zoom: this.viewport.zoom, viewport: this.viewport, ticks: sim.ticks, counts: sim.counts(), reactions: sim.reactions, cursor, temperature: sim.temperatureAt(cursor.x, cursor.y) });
     window.advanceTime = (ms: number) => { if (!paused) for (let i = 0; i < Math.round(ms / TICK_MS * speed); i++) sim.step(); this.draw(); updateStats(); };
   }
   update(_time: number, delta: number) {
     const p = this.input.activePointer;
     if (p.isDown && p.x >= 0 && p.y >= 0 && p.x < 960 && p.y < 576) {
-      const current = { x: Math.floor(p.x / CELL_SIZE), y: Math.floor(p.y / CELL_SIZE) };
+      const current = this.pointerCell(p);
       const previous = this.lastPoint ?? current, distance = Math.max(Math.abs(current.x - previous.x), Math.abs(current.y - previous.y), 1);
       for (let n = 0; n <= distance; n++) sim.paint(Math.round(previous.x + (current.x - previous.x) * n / distance), Math.round(previous.y + (current.y - previous.y) * n / distance), brush, erasing || p.rightButtonDown() ? 0 : selected);
       this.lastPoint = current; cursor = current;

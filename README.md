@@ -88,7 +88,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. Drag to paint; right-click or choose Erase to remove particles. Space pauses, brackets change brush size, and F toggles fullscreen. Focus the workspace and use arrow keys to position the brush and Enter to paint. Painting also works with touch.
+Open the local URL printed by Vite. Drag to paint; right-click or choose Erase to remove particles. Scroll the mouse wheel over the workspace to zoom toward the pointer, from 100% to 800%. The percentage above the canvas resets the view to 100%. Zoom changes the view and brush targeting, not the simulation resolution. Space pauses, brackets change brush size, and F toggles fullscreen. Focus the workspace and use arrow keys to position the brush and Enter to paint. Painting also works with touch.
 
 Use the example scenes or start with Blank canvas. Pause to build structures, then press Play. Step advances one simulation tick while paused. Clear removes all particles and reaction counters.
 
