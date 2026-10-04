@@ -41,7 +41,7 @@ Reactions examine neighbors left, right, above, below. Rules run in declaration 
 
 The constructor copies and freezes definitions/rules so editing source config cannot alter a running simulation. A seed plus identical config, ordered inputs and tick count produces identical output. Rendering consumes no simulation randomness. Compatibility fixtures captured before this migration compare exact particles, lifetimes, temperatures, UVs, counters and RNG state. Config tests define new materials and reorder the lab registry to prove behavior does not depend on built-in IDs. Replay serialization and event subscriptions remain future work; counters are the current observation API.
 
-The workspace uses a 960×576 particle grid, with one particle per native canvas pixel. Fullscreen expands the whole lab, keeping material selection, brush controls, and playback controls available. Escape exits the expanded view; browsers that allow native fullscreen also hide browser chrome.
+The workspace uses a 960×576 particle grid, with one particle per native canvas pixel. The mouse wheel zooms at the cursor; on touch screens, use the +/− controls and select Pan to drag the zoomed view before switching back to Paint or Erase. Fullscreen expands the whole lab, keeping material selection, brush controls, and playback controls available. Escape exits the expanded view; browsers that allow native fullscreen also hide browser chrome.
 
 At 1× speed the simulation targets 60 fixed updates per second, independently of the rendering FPS counter. Slow frames have a bounded catch-up budget to avoid freezing the interface. Steam uses translucent, soft vapor rendering with irregular buoyant drift. Particle lifetimes are scaled for the 60 Hz simulation.
 
