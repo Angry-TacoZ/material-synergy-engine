@@ -70,9 +70,10 @@ export const materials = [
     "group": "Solids",
     "state": "Solid",
     "formula": "Organic",
-    "description": "Connected wood moves as one piece and floats in water. Heavy loads can sink it. Heat and acid break it apart cell by cell.",
+    "description": "Connected wood moves as one piece and floats in water. Sustained heat can ignite it across a gap; acid erodes it cell by cell.",
     "reactions": [
       "Wood + lava / fire → fire",
+      "Wood held near 650 °F → fire",
       "Acid erodes wood cell by cell"
     ],
     "key": "wood",
@@ -84,7 +85,8 @@ export const materials = [
       "source": false,
       "flammability": {
         "output": "fire"
-      }
+      },
+      "heatIgnition": { "point": 343.5, "holdTicks": 45, "output": "fire", "counter": "ignition" }
     }
   },
   {
@@ -428,9 +430,10 @@ export const materials = [
     "group": "Solids",
     "state": "Solid",
     "formula": "Plant",
-    "description": "Light grass bonds where its cells touch and floats in water. Fire and lava burn it; acid consumes exposed cells. It does not grow automatically.",
+    "description": "Light grass bonds where its cells touch and floats in water. Sustained heat can ignite it across a gap; acid consumes exposed cells. It does not grow automatically.",
     "reactions": [
       "Grass + fire / lava → fire",
+      "Grass held near 550 °F → fire",
       "Acid erodes grass cell by cell"
     ],
     "key": "grass",
@@ -442,7 +445,8 @@ export const materials = [
       "source": false,
       "flammability": {
         "output": "fire"
-      }
+      },
+      "heatIgnition": { "point": 287.8, "holdTicks": 18, "output": "fire", "counter": "ignition" }
     }
   },
   {

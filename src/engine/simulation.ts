@@ -21,6 +21,7 @@ export class Simulation {
   temperature: Float32Array;
   private nextTemperature: Float32Array;
   private fusionHeat: Float32Array;
+  private ignitionExposure: Uint16Array;
   private thermal: ThermalField;
   readonly registry: ReturnType<typeof compileConfig>;
   readonly materials: ReturnType<typeof compileConfig>['materials'];
@@ -43,6 +44,7 @@ export class Simulation {
     this.temperature = new Float32Array(this.cells.length);
     this.nextTemperature = new Float32Array(this.cells.length);
     this.fusionHeat = new Float32Array(this.cells.length);
+    this.ignitionExposure = new Uint16Array(this.cells.length);
     this.thermal = new ThermalField(width, height);
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
@@ -52,14 +54,14 @@ export class Simulation {
     if (!material) throw new Error(`Unknown material ID: ${type}`);
     if (this.materials[this.cells[i]].state === 'Solid' || material.state === 'Solid') this.solidRevision++;
     this.revision++; this.cells[i] = type; this.temperature[i] = material.thermal.initialTemperature;
-    this.fusionHeat[i] = 0; if (material.thermal.source) this.thermal.wake();
+    this.fusionHeat[i] = 0; this.ignitionExposure[i] = 0; if (material.thermal.source) this.thermal.wake();
     this.surfaceUV[i] = (Math.floor(i / this.width) << 16) | (i % this.width);
     this.life[i] = material.lifetime ? material.lifetime.min + Math.floor(this.random() * material.lifetime.range) : 0;
     this.moved[i] = 1;
   }
-  clear() { this.solidRevision++; this.revision++; this.cells.fill(0); this.life.fill(0); this.surfaceUV.fill(0); this.temperature.fill(0); this.nextTemperature.fill(0); this.fusionHeat.fill(0); this.thermal.clear(); this.pendingShatter.clear(); this.owners.fill(0); this.nextOwners.fill(0); this.solidGroups = []; this.ticks = 0; for (const k of Object.keys(this.reactions) as (keyof typeof this.reactions)[]) this.reactions[k] = 0; }
+  clear() { this.solidRevision++; this.revision++; this.cells.fill(0); this.life.fill(0); this.surfaceUV.fill(0); this.temperature.fill(0); this.nextTemperature.fill(0); this.fusionHeat.fill(0); this.ignitionExposure.fill(0); this.thermal.clear(); this.pendingShatter.clear(); this.owners.fill(0); this.nextOwners.fill(0); this.solidGroups = []; this.ticks = 0; for (const k of Object.keys(this.reactions) as (keyof typeof this.reactions)[]) this.reactions[k] = 0; }
   paint(x: number, y: number, radius: number, type: number) { for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) if (dx * dx + dy * dy <= radius * radius) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < this.width && py < this.height && (type === 0 || this.cells[py * this.width + px] === 0)) this.set(px, py, type); } }
-  private swap(a: number, b: number) { [this.cells[a], this.cells[b]] = [this.cells[b], this.cells[a]]; [this.life[a], this.life[b]] = [this.life[b], this.life[a]]; const uv = this.surfaceUV[a]; this.surfaceUV[a] = this.surfaceUV[b]; this.surfaceUV[b] = uv; const temp = this.temperature[a]; this.temperature[a] = this.temperature[b]; this.temperature[b] = temp; const fusion = this.fusionHeat[a]; this.fusionHeat[a] = this.fusionHeat[b]; this.fusionHeat[b] = fusion; this.moved[a] = this.moved[b] = 1; }
+  private swap(a: number, b: number) { [this.cells[a], this.cells[b]] = [this.cells[b], this.cells[a]]; [this.life[a], this.life[b]] = [this.life[b], this.life[a]]; const uv = this.surfaceUV[a]; this.surfaceUV[a] = this.surfaceUV[b]; this.surfaceUV[b] = uv; const temp = this.temperature[a]; this.temperature[a] = this.temperature[b]; this.temperature[b] = temp; const fusion = this.fusionHeat[a]; this.fusionHeat[a] = this.fusionHeat[b]; this.fusionHeat[b] = fusion; const exposure = this.ignitionExposure[a]; this.ignitionExposure[a] = this.ignitionExposure[b]; this.ignitionExposure[b] = exposure; this.moved[a] = this.moved[b] = 1; }
   private adjacent(i: number) {
     const x = i % this.width;
     return [x > 0 ? i - 1 : -1, x < this.width - 1 ? i + 1 : -1, i >= this.width ? i - this.width : -1, i + this.width < this.cells.length ? i + this.width : -1].filter(n => n >= 0);
@@ -345,11 +347,11 @@ export class Simulation {
       if (target < 0 || Math.abs(target % this.width - x) > 2 || Math.abs(Math.floor(target / this.width) - y) > 2) { body.angularVelocity = 0; return; }
       reserved.add(target); candidates.push({ x, y, cell: target, old: point.cell });
     }
-    const record = (i: number) => ({ type: this.cells[i], life: this.life[i], uv: this.surfaceUV[i], temp: this.temperature[i], fusion: this.fusionHeat[i] });
+    const record = (i: number) => ({ type: this.cells[i], life: this.life[i], uv: this.surfaceUV[i], temp: this.temperature[i], fusion: this.fusionHeat[i], exposure: this.ignitionExposure[i] });
     const matter = candidates.map(p => record(p.old));
     const displaced = candidates.filter(p => this.owners[p.cell] !== id + 1).map(p => record(p.cell));
     const vacated = body.cells.filter(i => !reserved.has(i));
-    const put = (i: number, r: ReturnType<typeof record>) => { this.cells[i] = r.type; this.life[i] = r.life; this.surfaceUV[i] = r.uv; this.temperature[i] = r.temp; this.fusionHeat[i] = r.fusion; this.moved[i] = 1; };
+    const put = (i: number, r: ReturnType<typeof record>) => { this.cells[i] = r.type; this.life[i] = r.life; this.surfaceUV[i] = r.uv; this.temperature[i] = r.temp; this.fusionHeat[i] = r.fusion; this.ignitionExposure[i] = r.exposure; this.moved[i] = 1; };
     for (const i of body.cells) this.owners[i] = 0;
     for (let q = 0; q < vacated.length; q++) put(vacated[q], displaced[q]);
     for (let q = 0; q < candidates.length; q++) { put(candidates[q].cell, matter[q]); this.owners[candidates[q].cell] = id + 1; }
@@ -412,6 +414,10 @@ export class Simulation {
     for (let i = 0; i < this.cells.length; i++) {
       const phase = this.materials[this.cells[i]].thermal.phaseChange;
       if (phase && this.fusionHeat[i] >= phase.heat) { this.change(i, this.materialId(phase.output)); this.count(phase.counter); }
+      const ignition = this.materials[this.cells[i]].thermal.heatIgnition;
+      if (!ignition) continue;
+      this.ignitionExposure[i] = this.temperature[i] >= ignition.point ? Math.min(65535, this.ignitionExposure[i] + THERMAL_INTERVAL) : 0;
+      if (this.ignitionExposure[i] >= ignition.holdTicks) { this.change(i, this.materialId(ignition.output)); this.count(ignition.counter); }
     }
   }
   private fractureSolids() {

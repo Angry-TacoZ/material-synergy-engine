@@ -6,6 +6,7 @@ import './style.css';
 
 const CELL_SIZE = 1;
 const TICK_MS = 1000 / 60;
+const fahrenheit = (celsius: number) => Math.round(celsius * 9 / 5 + 32);
 const sim = new Simulation(960, 576);
 let selected = M.Sand, brush = 16, paused = false, speed = 1, erasing = false;
 let cursor = { x: 120, y: 50 }, keyboardCursor = false;
@@ -29,9 +30,11 @@ el<HTMLInputElement>('brush').max = '56'; el<HTMLInputElement>('brush').value = 
 const fractureButton = document.createElement('button'); fractureButton.dataset.scene = 'fracture'; fractureButton.innerHTML = 'Break a beam <span>↗</span>'; document.querySelector('.examples')!.append(fractureButton);
 const floatButton = document.createElement('button'); floatButton.dataset.scene = 'float'; floatButton.innerHTML = 'Sink or float <span>↗</span>'; document.querySelector('.examples')!.append(floatButton);
 const heatButton = document.createElement('button'); heatButton.dataset.scene = 'heat'; heatButton.innerHTML = 'Heat across a gap <span>↗</span>'; document.querySelector('.examples')!.append(heatButton);
+const ignitionButton = document.createElement('button'); ignitionButton.dataset.scene = 'ignite'; ignitionButton.innerHTML = 'Ignite across a gap <span>↗</span>'; document.querySelector('.examples')!.append(ignitionButton);
 const tipButton = document.createElement('button'); tipButton.dataset.scene = 'tip'; tipButton.innerHTML = 'Tip a beam <span>↗</span>'; document.querySelector('.examples')!.append(tipButton);
 const stressButton = document.createElement('button'); stressButton.dataset.scene = 'stress'; stressButton.innerHTML = 'Concrete stress <span>↗</span>'; document.querySelector('.examples')!.append(stressButton);
 const shatterButton = document.createElement('button'); shatterButton.dataset.scene = 'shatter'; shatterButton.innerHTML = 'Shatter glass <span>↗</span>'; document.querySelector('.examples')!.append(shatterButton);
+const firButton = document.createElement('button'); firButton.dataset.scene = 'fir'; firButton.innerHTML = 'Fir tree <span>↗</span>'; document.querySelector('.examples')!.append(firButton);
 let filter = 'All';
 function palette() {
   const query = el<HTMLInputElement>('search').value.toLowerCase();
@@ -42,7 +45,7 @@ function detail() {
   const m = materials[selected];
   el('material-detail').innerHTML = `<div class="specimen" style="--material:${m.color}"><div class="pixel-cluster"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><span>${m.formula}</span></div><div class="material-heading"><h2>${m.name}</h2><span>${m.state}</span></div><p class="description">${m.description}</p><div class="eyebrow reaction-title">WHAT HAPPENS</div><ul class="reaction-list">${m.reactions.map(r => `<li>${r}</li>`).join('')}</ul>`;
   const properties = document.createElement('div'); properties.className = 'physical-properties';
-  properties.innerHTML = `<dl><div><dt>Model density</dt><dd>${m.density.toLocaleString()} kg/m³</dd></div><div><dt>Mass per cell</dt><dd>${(m.density / 1000).toFixed(3)} u</dd></div><div><dt>Brush temperature</dt><dd id="temperature-info">0 °C</dd></div></dl><p>1 u = the mass of one water cell.</p><div id="piece-info">Point at a solid to inspect its mass.</div>`;
+  properties.innerHTML = `<dl><div><dt>Model density</dt><dd>${m.density.toLocaleString()} kg/m³</dd></div><div><dt>Mass per cell</dt><dd>${(m.density / 1000).toFixed(3)} u</dd></div><div><dt>Brush temperature</dt><dd id="temperature-info">32 °F</dd></div></dl><p>1 u = the mass of one water cell.</p><div id="piece-info">Point at a solid to inspect its mass.</div>`;
   el('material-detail').querySelector('.description')!.after(properties);
 }
 function setErase(value: boolean) { erasing = value; el('erase').classList.toggle('active', value); el('paint').classList.toggle('active', !value); el('erase').setAttribute('aria-pressed', String(value)); el('paint').setAttribute('aria-pressed', String(!value)); }
@@ -80,7 +83,7 @@ function updateStats() {
   el('reactions').innerHTML = events.length ? events.map(v => `<p><span class="event-dot"></span>${v}</p>`).join('') : 'Your experiments will appear here.';
   const body = sim.bodyAt(cursor.x, cursor.y);
   if (sim.reactions.shattering) el('reactions').insertAdjacentHTML('beforeend', `<p><span class="event-dot"></span>Glass shattered · ${sim.reactions.shattering}</p>`);
-  el('temperature-info').textContent = `${Math.round(sim.temperatureAt(cursor.x, cursor.y))} °C`;
+  el('temperature-info').textContent = `${fahrenheit(sim.temperatureAt(cursor.x, cursor.y))} °F`;
   el('piece-info').textContent = body ? `${body.material} piece · ${body.cells.toLocaleString()} cells · ${body.mass.toLocaleString(undefined, { maximumFractionDigits: 2 })} u${body.carriedMass > .001 ? ` · carrying ${body.carriedMass.toLocaleString(undefined, { maximumFractionDigits: 2 })} u` : ''}` : 'Point at a solid to inspect its mass.';
 }
 class SandboxScene extends Phaser.Scene {
@@ -129,7 +132,7 @@ class SandboxScene extends Phaser.Scene {
     this.input.on('gameout', () => this.lastPoint = null);
     sim.load('landscape');
     this.draw();
-    window.render_game_to_text = () => JSON.stringify({ coordinates: `origin top-left; x right; y down; ${sim.width}×${sim.height} cells`, simulationHz: 60, massUnits: 'one water cell = 1 u', bodies: sim.bodySummaries(), paused, selected: materials[selected].name, erasing, brush, speed, zoom: this.viewport.zoom, viewport: this.viewport, ticks: sim.ticks, counts: sim.counts(), reactions: sim.reactions, cursor, temperature: sim.temperatureAt(cursor.x, cursor.y) });
+    window.render_game_to_text = () => JSON.stringify({ coordinates: `origin top-left; x right; y down; ${sim.width}×${sim.height} cells`, simulationHz: 60, massUnits: 'one water cell = 1 u', bodies: sim.bodySummaries(), paused, selected: materials[selected].name, erasing, brush, speed, zoom: this.viewport.zoom, viewport: this.viewport, ticks: sim.ticks, counts: sim.counts(), reactions: sim.reactions, cursor, temperature: fahrenheit(sim.temperatureAt(cursor.x, cursor.y)), temperatureUnit: '°F' });
     window.advanceTime = (ms: number) => { if (!paused) for (let i = 0; i < Math.round(ms / TICK_MS * speed); i++) sim.step(); this.draw(); updateStats(); };
   }
   update(_time: number, delta: number) {
