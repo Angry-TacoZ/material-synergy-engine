@@ -71,7 +71,7 @@ Lava and fire heat a separate coarse field that spreads and fades through nearby
 
 Try **Heat across a gap**: glass walls keep lava away from the ice. The nearby block melts from its exposed edges while the distant block stays cold. Point the brush at air or matter to inspect temperature. Clear resets particles, temperature, and residual heat.
 
-Thermal updates run at 20 Hz alongside 60 Hz particle motion, using an 8-pixel field with diffusion/cooling. Displayed Celsius values, capacities, and phase-change heat are authored game parameters. Ambient is fixed at 0 model degrees, lava/fire act as sustained heat sources, and material heating currently adds non-contact ice melting. Heat does not model physical radiation occlusion, convection, calibrated conduction, or energy conservation.
+Thermal updates run at 20 Hz alongside 60 Hz particle motion, using an 8-pixel field with diffusion/cooling. Particle Lab displays temperatures in Fahrenheit; the internal values remain on the original Celsius-like model scale, so reaction thresholds and replays are unchanged. Capacities and phase-change heat are authored game parameters. Ambient is fixed at 0 model degrees (shown as 32 °F), lava/fire act as sustained heat sources, and material heating currently adds non-contact ice melting. Heat does not model physical radiation occlusion, convection, calibrated conduction, or energy conservation.
 
 ## Density and mass
 
