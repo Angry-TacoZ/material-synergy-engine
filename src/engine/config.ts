@@ -4,7 +4,7 @@ export type StressFailure = Transition & { compression: number; bending: number;
 export type MaterialDefinition = {
   key: string; name: string; state: State; density: number;
   thermal: { initialTemperature: number; capacity: number; conductivity: number; airTransfer: number; source?: boolean;
-    flammability?: Transition; phaseChange?: Transition & { point: number; heat: number } };
+    flammability?: Transition; heatIgnition?: Transition & { point: number; holdTicks: number }; phaseChange?: Transition & { point: number; heat: number } };
   lifetime?: Transition & { min: number; range: number; spawnAbove?: { chance: number; output: string } };
   motion?: { pauseChance?: number; stepEvery?: number; diagonalFirstChance?: number };
   collision?: { hard: boolean };
@@ -38,6 +38,7 @@ export function compileConfig(input: WorldConfig) {
     finite(m.thermal.initialTemperature, 'temperature', -Infinity);
     finite(m.thermal.capacity, 'capacity', Number.MIN_VALUE); finite(m.thermal.conductivity, 'conductivity'); finite(m.thermal.airTransfer, 'air transfer');
     if (m.thermal.phaseChange) { finite(m.thermal.phaseChange.point, 'phase point', -Infinity); finite(m.thermal.phaseChange.heat, 'phase heat', Number.MIN_VALUE); }
+    if (m.thermal.heatIgnition) { finite(m.thermal.heatIgnition.point, 'ignition point', -Infinity); if (!Number.isInteger(m.thermal.heatIgnition.holdTicks) || m.thermal.heatIgnition.holdTicks < 1 || m.thermal.heatIgnition.holdTicks > 65535) throw new Error('Invalid ignition hold ticks'); }
     if (m.lifetime) { for (const v of [m.lifetime.min, m.lifetime.range]) if (!Number.isInteger(v) || v < 0) throw new Error('Invalid lifetime'); if (m.lifetime.min + m.lifetime.range > 65535) throw new Error('Lifetime exceeds storage'); probability(m.lifetime.spawnAbove?.chance); }
     probability(m.motion?.pauseChance); probability(m.motion?.diagonalFirstChance);
     if (m.motion?.stepEvery !== undefined && (!Number.isInteger(m.motion.stepEvery) || m.motion.stepEvery < 1)) throw new Error('Invalid motion interval');
@@ -47,7 +48,7 @@ export function compileConfig(input: WorldConfig) {
   }
   const materialId = (key: string) => { const id = ids.get(key); if (id === undefined) throw new Error(`Unknown material: ${key}`); return id; };
   const counters = new Set(config.counters);
-  for (const m of materials) for (const t of [m.thermal.flammability, m.thermal.phaseChange, m.lifetime, m.failure?.impact, m.failure?.stress]) if (t) { materialId(t.output); if (t.counter) counters.add(t.counter); }
+  for (const m of materials) for (const t of [m.thermal.flammability, m.thermal.heatIgnition, m.thermal.phaseChange, m.lifetime, m.failure?.impact, m.failure?.stress]) if (t) { materialId(t.output); if (t.counter) counters.add(t.counter); }
   for (const m of materials) if (m.lifetime?.spawnAbove) materialId(m.lifetime.spawnAbove.output);
   const matches = (selector: Selector) => {
     if (Array.isArray(selector)) return selector.map(materialId);

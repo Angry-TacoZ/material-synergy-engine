@@ -11,6 +11,12 @@ export function loadScene(sim: Simulation, preset: string) {
     if (preset === 'fracture') { rect(110, 110, 20, 34, M.Stone); rect(118, 75, 4, 35, M.Wood); rect(75, 70, 90, 5, M.Wood); rect(95, 58, 5, 10, M.Acid); return; }
     if (preset === 'float') { rect(20, 140, 200, 4, M.Stone); rect(20, 62, 4, 78, M.Stone); rect(216, 62, 4, 78, M.Stone); rect(24, 90, 192, 50, M.Water); rect(55, 65, 24, 12, M.Wood); rect(105, 62, 20, 16, M.Ice); rect(160, 65, 16, 16, M.Glass); return; }
     if (preset === 'heat') { rect(25, 140, 190, 4, M.Stone); rect(44, 126, 1, 14, M.Glass); rect(80, 126, 1, 14, M.Glass); rect(45, 130, 35, 10, M.Lava); rect(85, 128, 35, 12, M.Ice); rect(170, 128, 25, 12, M.Ice); return; }
+    if (preset === 'ignite') {
+      rect(18, 136, 204, 8, M.Stone);
+      rect(35, 125, 28, 11, M.Lava); rect(63, 121, 2, 15, M.Glass); rect(61, 133, 6, 3, M.Glass); rect(68, 122, 22, 14, M.Grass);
+      rect(140, 125, 28, 11, M.Lava); rect(168, 121, 2, 15, M.Glass); rect(166, 133, 6, 3, M.Glass); rect(173, 122, 22, 14, M.Wood);
+      return;
+    }
     if (preset === 'tip') { rect(20, 140, 200, 4, M.Concrete); rect(95, 100, 10, 40, M.Concrete); rect(95, 88, 50, 12, M.Wood); rect(40, 134, 20, 6, M.Grass); return; }
     if (preset === 'stress') { rect(20, 140, 200, 4, M.Stone); rect(118, 90, 2, 50, M.Concrete); rect(85, 78, 70, 12, M.Concrete); return; }
     if (preset === 'shatter') { rect(20, 140, 200, 4, M.Concrete); rect(45, 50, 18, 18, M.Glass); rect(145, 125, 40, 15, M.Glass); rect(150, 50, 18, 18, M.Glass); return; }
