@@ -41,7 +41,7 @@ Reactions examine neighbors left, right, above, below. Rules run in declaration 
 
 The constructor copies and freezes definitions/rules so editing source config cannot alter a running simulation. A seed plus identical config, ordered inputs and tick count produces identical output. Rendering consumes no simulation randomness. Compatibility fixtures captured before this migration compare exact particles, lifetimes, temperatures, UVs, counters and RNG state. Config tests define new materials and reorder the lab registry to prove behavior does not depend on built-in IDs. Replay serialization and event subscriptions remain future work; counters are the current observation API.
 
-The workspace uses a 960×576 particle grid, with one particle per native canvas pixel. Fullscreen expands the whole lab, keeping material selection, brush controls, and playback controls available. Escape exits the expanded view; browsers that allow native fullscreen also hide browser chrome.
+The workspace uses a 960×576 particle grid, with one particle per native canvas pixel. The mouse wheel zooms at the cursor; on touch screens, use the +/− controls and select Pan to drag the zoomed view before switching back to Paint or Erase. Fullscreen expands the whole lab, keeping material selection, brush controls, and playback controls available. Escape exits the expanded view; browsers that allow native fullscreen also hide browser chrome.
 
 At 1× speed the simulation targets 60 fixed updates per second, independently of the rendering FPS counter. Slow frames have a bounded catch-up budget to avoid freezing the interface. Steam uses translucent, soft vapor rendering with irregular buoyant drift. Particle lifetimes are scaled for the 60 Hz simulation.
 
@@ -88,7 +88,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL printed by Vite. Drag to paint; right-click or choose Erase to remove particles. Space pauses, brackets change brush size, and F toggles fullscreen. Focus the workspace and use arrow keys to position the brush and Enter to paint. Painting also works with touch.
+Open the local URL printed by Vite. Drag to paint; right-click or choose Erase to remove particles. Scroll the mouse wheel over the workspace to zoom toward the pointer, from 100% to 800%. The percentage above the canvas resets the view to 100%. Zoom changes the view and brush targeting, not the simulation resolution. Space pauses, brackets change brush size, and F toggles fullscreen. Focus the workspace and use arrow keys to position the brush and Enter to paint. Painting also works with touch.
 
 Use the example scenes or start with Blank canvas. Pause to build structures, then press Play. Step advances one simulation tick while paused. Clear removes all particles and reaction counters.
 
