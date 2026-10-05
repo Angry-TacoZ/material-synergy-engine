@@ -72,7 +72,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'f') fullscreen();
   if (e.key === '[' || e.key === ']') { brush = Phaser.Math.Clamp(brush + (e.key === '[' ? -1 : 1), 1, 56); el<HTMLInputElement>('brush').value = String(brush); el('brush-value').textContent = String(brush); }
   if (e.key.startsWith('Arrow') && document.activeElement === el('game')) { e.preventDefault(); keyboardCursor = true; cursor.x = Phaser.Math.Clamp(cursor.x + (e.key === 'ArrowRight' ? 3 : e.key === 'ArrowLeft' ? -3 : 0), 0, sim.width - 1); cursor.y = Phaser.Math.Clamp(cursor.y + (e.key === 'ArrowDown' ? 3 : e.key === 'ArrowUp' ? -3 : 0), 0, sim.height - 1); }
-  if (e.key === 'Enter' && document.activeElement === el('game')) { e.preventDefault(); sim.paint(cursor.x, cursor.y, brush, erasing ? 0 : selected); }
+  if (e.key === 'Enter' && document.activeElement === el('game')) { e.preventDefault(); if (!panning) sim.paint(cursor.x, cursor.y, brush, erasing ? 0 : selected); }
 });
 
 function updateStats() {
