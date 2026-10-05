@@ -48,7 +48,8 @@ export function loadScene(sim: Simulation, preset: string) {
       woodLine(120, 134, 120, 29, 2.5);
       for (const [y, reach] of [[52, 13], [67, 20], [83, 27], [101, 35], [117, 42]] as const) {
         woodLine(120, y, 120 - reach * .56, y + 7, 1);
-        woodLine(120, y + 2, 120 + reach * .66, y + 9, 1);
+          // Keep the lowest tip inside the crown so grass connects around it.
+          woodLine(120, y + 2, 120 + reach * .66, y + (y === 117 ? 6 : 9), 1);
       }
       return;
     }
