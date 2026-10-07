@@ -8,15 +8,16 @@ const definition = (key: string, state: MaterialDefinition['state']): MaterialDe
   thermal: { initialTemperature: 0, capacity: 1, conductivity: .12, airTransfer: .16 },
 });
 
-test('initially hot fuel ignites without a sustained thermal source', () => {
+for (const phase of [0, 1, 2]) for (const holdTicks of [1, 2, 4, 9]) test(`hot fuel waits exactly ${holdTicks} steps when placed at phase ${phase}`, () => {
   const fuel = definition('fuel', 'Solid');
   fuel.thermal = { initialTemperature: 500, capacity: 1, conductivity: 0, airTransfer: 0,
-    heatIgnition: { point: 200, holdTicks: 9, output: 'burnt', counter: 'heated' } };
+    heatIgnition: { point: 200, holdTicks, output: 'burnt', counter: 'heated' } };
   const s = new EngineSimulation({ materials: [definition('void', 'Empty'), fuel, definition('burnt', 'Solid')], reactions: [] }, 24, 12);
+  for (let tick = 0; tick < phase; tick++) s.step();
   s.set(15, 11, s.materialId('fuel'));
-  for (let tick = 0; tick < 6; tick++) s.step();
+  for (let tick = 0; tick < holdTicks - 1; tick++) s.step();
   assert.equal(s.cells[11 * s.width + 15], s.materialId('fuel'), 'must wait for the configured exposure');
-  for (let tick = 0; tick < 3; tick++) s.step();
+  s.step();
   assert.equal(s.cells[11 * s.width + 15], s.materialId('burnt'));
   assert.equal(s.reactions.heated, 1);
 });
