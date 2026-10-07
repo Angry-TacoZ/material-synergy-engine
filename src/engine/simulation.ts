@@ -388,7 +388,11 @@ export class Simulation {
     return this.cells[i] ? this.temperature[i] : this.thermal.at(x, y);
   }
   private transferHeat() {
-    if (this.ticks % THERMAL_INTERVAL || !this.thermal.update(this.cells, this.temperature, this.width, this.materials)) return;
+    if (this.ticks % THERMAL_INTERVAL) return;
+    if (!this.thermal.update(this.cells, this.temperature, this.width, this.materials)) {
+      this.evaluateHeatIgnition();
+      return;
+    }
     // Double buffering prevents scan direction from deciding which side heats first.
     this.nextTemperature.set(this.temperature);
     for (let y = 0; y < this.height; y++) for (let x = 0; x < this.width; x++) {
@@ -414,6 +418,12 @@ export class Simulation {
     for (let i = 0; i < this.cells.length; i++) {
       const phase = this.materials[this.cells[i]].thermal.phaseChange;
       if (phase && this.fusionHeat[i] >= phase.heat) { this.change(i, this.materialId(phase.output)); this.count(phase.counter); }
+    }
+    this.evaluateHeatIgnition();
+  }
+  private evaluateHeatIgnition() {
+    // Exposure depends on particle temperature, even while the spatial heat field sleeps.
+    for (let i = 0; i < this.cells.length; i++) {
       const ignition = this.materials[this.cells[i]].thermal.heatIgnition;
       if (!ignition) continue;
       this.ignitionExposure[i] = this.temperature[i] >= ignition.point ? Math.min(65535, this.ignitionExposure[i] + THERMAL_INTERVAL) : 0;

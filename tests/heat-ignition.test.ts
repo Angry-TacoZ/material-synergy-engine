@@ -8,6 +8,19 @@ const definition = (key: string, state: MaterialDefinition['state']): MaterialDe
   thermal: { initialTemperature: 0, capacity: 1, conductivity: .12, airTransfer: .16 },
 });
 
+test('initially hot fuel ignites without a sustained thermal source', () => {
+  const fuel = definition('fuel', 'Solid');
+  fuel.thermal = { initialTemperature: 500, capacity: 1, conductivity: 0, airTransfer: 0,
+    heatIgnition: { point: 200, holdTicks: 9, output: 'burnt', counter: 'heated' } };
+  const s = new EngineSimulation({ materials: [definition('void', 'Empty'), fuel, definition('burnt', 'Solid')], reactions: [] }, 24, 12);
+  s.set(15, 11, s.materialId('fuel'));
+  for (let tick = 0; tick < 6; tick++) s.step();
+  assert.equal(s.cells[11 * s.width + 15], s.materialId('fuel'), 'must wait for the configured exposure');
+  for (let tick = 0; tick < 3; tick++) s.step();
+  assert.equal(s.cells[11 * s.width + 15], s.materialId('burnt'));
+  assert.equal(s.reactions.heated, 1);
+});
+
 test('a test-only material ignites after sustained heat without contact, then resets after cooling', () => {
   const config: WorldConfig = { materials: [definition('void', 'Empty'), definition('heater', 'Solid'), definition('fiber', 'Solid'), definition('flame', 'Gas')], reactions: [] };
   config.materials[1].thermal = { initialTemperature: 600, source: true, capacity: 1, conductivity: .12, airTransfer: .16 };
