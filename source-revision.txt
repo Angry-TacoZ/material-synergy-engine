@@ -1,2 +1,2 @@
-34b40a2fb7c25b058523e45e92ab0e0e8a8b363f
+f4f6c338add0ddf260ff1c34425ac0d6dbe360e2
 Built with npm run build -- --base=/material-synergy-engine/
