@@ -5,6 +5,14 @@ import { Simulation as EngineSimulation, type MaterialDefinition, type WorldConf
 
 type IgnitionIndex = { ignitionBits: Uint32Array; occupiedBits: Uint32Array; rowWordCount: number };
 
+class CapturingCellsBuffer extends Uint8Array {
+  capturedSource?: ArrayLike<number>;
+  override set(source: ArrayLike<number>, offset = 0) {
+    this.capturedSource = source;
+    super.set(source, offset);
+  }
+}
+
 function assertIgnitionIndex(sim: EngineSimulation) {
   const index = sim as unknown as IgnitionIndex;
   const expected = new Uint32Array(Math.ceil(sim.cells.length / 32));
@@ -54,6 +62,17 @@ test('cell reads are immutable and controlled writes keep the occupied index syn
   assertIgnitionIndex(sim);
   sim.step();
   assert.equal(sim.cells[112], M.Sand, 'controlled placement is discovered by the occupied-cell index');
+  assertIgnitionIndex(sim);
+});
+
+test('copyCellsTo does not expose its private backing array to caller overrides', () => {
+  const sim = new Simulation(32, 32), target = new CapturingCellsBuffer(32 * 32);
+  sim.set(16, 2, M.Sand);
+  sim.copyCellsTo(target);
+  assert.equal(target[80], M.Sand, 'the caller-owned buffer receives a copy');
+  assert.equal(target.capturedSource, undefined, 'the target override cannot capture private cell storage');
+  sim.step();
+  assert.equal(sim.cells[112], M.Sand, 'copying does not corrupt the occupied-cell index');
   assertIgnitionIndex(sim);
 });
 

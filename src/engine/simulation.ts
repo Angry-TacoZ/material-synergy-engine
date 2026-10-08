@@ -92,7 +92,7 @@ export class Simulation {
   /** Copies the current cells into a caller-owned buffer, suitable for reusable render buffers. */
   copyCellsTo(target: Uint8Array) {
     if (!(target instanceof Uint8Array) || target.length !== this.#cells.length) throw new RangeError(`Expected a Uint8Array of length ${this.#cells.length}`);
-    target.set(this.#cells);
+    Uint8Array.prototype.set.call(target, this.#cells);
   }
   set(x: number, y: number, type: number) { if (x < 0 || y < 0 || x >= this.width || y >= this.height) return; this.change(y * this.width + x, type); }
   /** Fills the world through the normal indexed mutation path. */
