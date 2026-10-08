@@ -30,6 +30,7 @@ el<HTMLInputElement>('brush').max = '56'; el<HTMLInputElement>('brush').value = 
 const fractureButton = document.createElement('button'); fractureButton.dataset.scene = 'fracture'; fractureButton.innerHTML = 'Break a beam <span>↗</span>'; document.querySelector('.examples')!.append(fractureButton);
 const floatButton = document.createElement('button'); floatButton.dataset.scene = 'float'; floatButton.innerHTML = 'Sink or float <span>↗</span>'; document.querySelector('.examples')!.append(floatButton);
 const heatButton = document.createElement('button'); heatButton.dataset.scene = 'heat'; heatButton.innerHTML = 'Heat across a gap <span>↗</span>'; document.querySelector('.examples')!.append(heatButton);
+const ignitionButton = document.createElement('button'); ignitionButton.dataset.scene = 'ignite'; ignitionButton.innerHTML = 'Ignite across a gap <span>↗</span>'; document.querySelector('.examples')!.append(ignitionButton);
 const tipButton = document.createElement('button'); tipButton.dataset.scene = 'tip'; tipButton.innerHTML = 'Tip a beam <span>↗</span>'; document.querySelector('.examples')!.append(tipButton);
 const stressButton = document.createElement('button'); stressButton.dataset.scene = 'stress'; stressButton.innerHTML = 'Concrete stress <span>↗</span>'; document.querySelector('.examples')!.append(stressButton);
 const shatterButton = document.createElement('button'); shatterButton.dataset.scene = 'shatter'; shatterButton.innerHTML = 'Shatter glass <span>↗</span>'; document.querySelector('.examples')!.append(shatterButton);
