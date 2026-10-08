@@ -13,8 +13,39 @@ type SolidBody = {
   collisionVelocity?: number;
 };
 export type BodyInfo = { material: string; cells: number; density: number; mass: number; carriedMass: number; displacedMass: number; velocity: number; angle: number; minX: number; maxX: number; minY: number; maxY: number };
+export interface CellReadView extends Iterable<number> {
+  readonly length: number;
+  readonly [index: number]: number;
+  every(predicate: (value: number, index: number, array: CellReadView) => unknown, thisArg?: unknown): boolean;
+  slice(start?: number, end?: number): Uint8Array;
+}
+
+function createCellReadView(cells: Uint8Array): CellReadView {
+  let view: CellReadView;
+  view = new Proxy(Object.create(null) as CellReadView, {
+    get(_target, property) {
+      if (property === 'length') return cells.length;
+      if (property === Symbol.iterator) return cells.values.bind(cells);
+      if (property === 'every') return (predicate: (value: number, index: number, array: CellReadView) => unknown, thisArg?: unknown) => {
+        for (let index = 0; index < cells.length; index++) if (!predicate.call(thisArg, cells[index], index, view)) return false;
+        return true;
+      };
+      if (property === 'slice') return cells.slice.bind(cells);
+      if (typeof property === 'string' && /^(0|[1-9]\d*)$/.test(property)) return cells[Number(property)];
+      return undefined;
+    },
+    set() { throw new TypeError('Simulation.cells is read-only; use set(), paint(), fill(), or clear()'); },
+    defineProperty() { throw new TypeError('Simulation.cells is read-only; use set(), paint(), fill(), or clear()'); },
+    deleteProperty() { throw new TypeError('Simulation.cells is read-only; use set(), paint(), fill(), or clear()'); },
+  });
+  return view;
+}
+
 export class Simulation {
-  cells: Uint8Array; life: Uint16Array; moved: Uint8Array; ticks = 0; revision = 0;
+  #cells: Uint8Array;
+  /** Live read-only cell access; use set(), paint(), fill(), or clear() to mutate the world. */
+  readonly cells: CellReadView;
+  life: Uint16Array; moved: Uint8Array; ticks = 0; revision = 0;
   /** Decorative UV coordinates travel with matter; collision rules never read them. */
   surfaceUV: Uint32Array;
   /** Particle temperatures and melting heat move with matter, including fragments. */
@@ -41,61 +72,75 @@ export class Simulation {
   private seed: number;
   constructor(config: WorldConfig, public width = 240, public height = 144, seed = 42) {
     this.registry = compileConfig(config); this.materials = this.registry.materials; this.reactions = this.registry.counters;
-    this.cells = new Uint8Array(width * height); this.life = new Uint16Array(this.cells.length); this.moved = new Uint8Array(this.cells.length); this.seed = seed;
-    this.owners = new Uint32Array(this.cells.length);
-    this.nextOwners = new Uint32Array(this.cells.length);
-    this.surfaceUV = new Uint32Array(this.cells.length);
-    this.temperature = new Float32Array(this.cells.length);
-    this.nextTemperature = new Float32Array(this.cells.length);
-    this.fusionHeat = new Float32Array(this.cells.length);
-    this.ignitionExposure = new Uint16Array(this.cells.length);
-    this.ignitionBits = new Uint32Array(Math.ceil(this.cells.length / 32));
+    this.#cells = new Uint8Array(width * height); this.cells = createCellReadView(this.#cells);
+    this.life = new Uint16Array(this.#cells.length); this.moved = new Uint8Array(this.#cells.length); this.seed = seed;
+    this.owners = new Uint32Array(this.#cells.length);
+    this.nextOwners = new Uint32Array(this.#cells.length);
+    this.surfaceUV = new Uint32Array(this.#cells.length);
+    this.temperature = new Float32Array(this.#cells.length);
+    this.nextTemperature = new Float32Array(this.#cells.length);
+    this.fusionHeat = new Float32Array(this.#cells.length);
+    this.ignitionExposure = new Uint16Array(this.#cells.length);
+    this.ignitionBits = new Uint32Array(Math.ceil(this.#cells.length / 32));
     this.rowWordCount = Math.ceil(width / 32);
     this.occupiedBits = new Uint32Array(height * this.rowWordCount);
     this.thermal = new ThermalField(width, height);
   }
   random() { this.seed = (Math.imul(this.seed, 1664525) + 1013904223) >>> 0; return this.seed / 4294967296; }
+  getCell(index: number) { return this.#cells[index]; }
+  copyCells() { return this.#cells.slice(); }
+  /** Copies the current cells into a caller-owned buffer, suitable for reusable render buffers. */
+  copyCellsTo(target: Uint8Array) {
+    if (!(target instanceof Uint8Array) || target.length !== this.#cells.length) throw new RangeError(`Expected a Uint8Array of length ${this.#cells.length}`);
+    target.set(this.#cells);
+  }
   set(x: number, y: number, type: number) { if (x < 0 || y < 0 || x >= this.width || y >= this.height) return; this.change(y * this.width + x, type); }
+  /** Fills the world through the normal indexed mutation path. */
+  fill(type: number) {
+    if (!this.materials[type]) throw new Error(`Unknown material ID: ${type}`);
+    if (type === 0) { this.clear(); return; }
+    for (let i = 0; i < this.#cells.length; i++) this.change(i, type);
+  }
   private change(i: number, type: number) {
     const material = this.materials[type];
     if (!material) throw new Error(`Unknown material ID: ${type}`);
-    if (this.materials[this.cells[i]].state === 'Solid' || material.state === 'Solid') this.solidRevision++;
-    this.revision++; this.cells[i] = type; this.updateIgnitionMembership(i); this.updateOccupied(i); this.temperature[i] = material.thermal.initialTemperature;
+    if (this.materials[this.#cells[i]].state === 'Solid' || material.state === 'Solid') this.solidRevision++;
+    this.revision++; this.#cells[i] = type; this.updateIgnitionMembership(i); this.updateOccupied(i); this.temperature[i] = material.thermal.initialTemperature;
     this.fusionHeat[i] = 0; this.ignitionExposure[i] = 0; if (material.thermal.source) this.thermal.wake();
     this.surfaceUV[i] = (Math.floor(i / this.width) << 16) | (i % this.width);
     this.life[i] = material.lifetime ? material.lifetime.min + Math.floor(this.random() * material.lifetime.range) : 0;
     this.moved[i] = 1;
   }
-  clear() { this.solidRevision++; this.revision++; this.cells.fill(0); this.life.fill(0); this.surfaceUV.fill(0); this.temperature.fill(0); this.nextTemperature.fill(0); this.fusionHeat.fill(0); this.ignitionExposure.fill(0); this.ignitionBits.fill(0); this.occupiedBits.fill(0); this.thermal.clear(); this.pendingShatter.clear(); this.owners.fill(0); this.nextOwners.fill(0); this.solidGroups = []; this.ticks = 0; for (const k of Object.keys(this.reactions) as (keyof typeof this.reactions)[]) this.reactions[k] = 0; }
-  paint(x: number, y: number, radius: number, type: number) { for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) if (dx * dx + dy * dy <= radius * radius) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < this.width && py < this.height && (type === 0 || this.cells[py * this.width + px] === 0)) this.set(px, py, type); } }
+  clear() { this.solidRevision++; this.revision++; this.#cells.fill(0); this.life.fill(0); this.surfaceUV.fill(0); this.temperature.fill(0); this.nextTemperature.fill(0); this.fusionHeat.fill(0); this.ignitionExposure.fill(0); this.ignitionBits.fill(0); this.occupiedBits.fill(0); this.thermal.clear(); this.pendingShatter.clear(); this.owners.fill(0); this.nextOwners.fill(0); this.solidGroups = []; this.ticks = 0; for (const k of Object.keys(this.reactions) as (keyof typeof this.reactions)[]) this.reactions[k] = 0; }
+  paint(x: number, y: number, radius: number, type: number) { for (let dy = -radius; dy <= radius; dy++) for (let dx = -radius; dx <= radius; dx++) if (dx * dx + dy * dy <= radius * radius) { const px = x + dx, py = y + dy; if (px >= 0 && py >= 0 && px < this.width && py < this.height && (type === 0 || this.#cells[py * this.width + px] === 0)) this.set(px, py, type); } }
   private updateIgnitionMembership(i: number) {
     if (this.evaluatingIgnition) return;
     const word = i >>> 5, bit = 1 << (i & 31);
-    if (this.materials[this.cells[i]].thermal.heatIgnition) this.ignitionBits[word] |= bit;
+    if (this.materials[this.#cells[i]].thermal.heatIgnition) this.ignitionBits[word] |= bit;
     else this.ignitionBits[word] &= ~bit;
   }
   private updateOccupied(i: number) {
     const x = i % this.width, word = Math.floor(i / this.width) * this.rowWordCount + (x >>> 5), bit = 1 << (x & 31);
-    if (this.cells[i]) this.occupiedBits[word] |= bit;
+    if (this.#cells[i]) this.occupiedBits[word] |= bit;
     else this.occupiedBits[word] &= ~bit;
   }
-  private swap(a: number, b: number) { [this.cells[a], this.cells[b]] = [this.cells[b], this.cells[a]]; [this.life[a], this.life[b]] = [this.life[b], this.life[a]]; const uv = this.surfaceUV[a]; this.surfaceUV[a] = this.surfaceUV[b]; this.surfaceUV[b] = uv; const temp = this.temperature[a]; this.temperature[a] = this.temperature[b]; this.temperature[b] = temp; const fusion = this.fusionHeat[a]; this.fusionHeat[a] = this.fusionHeat[b]; this.fusionHeat[b] = fusion; const exposure = this.ignitionExposure[a]; this.ignitionExposure[a] = this.ignitionExposure[b]; this.ignitionExposure[b] = exposure; this.updateIgnitionMembership(a); this.updateIgnitionMembership(b); this.updateOccupied(a); this.updateOccupied(b); this.moved[a] = this.moved[b] = 1; }
+  private swap(a: number, b: number) { [this.#cells[a], this.#cells[b]] = [this.#cells[b], this.#cells[a]]; [this.life[a], this.life[b]] = [this.life[b], this.life[a]]; const uv = this.surfaceUV[a]; this.surfaceUV[a] = this.surfaceUV[b]; this.surfaceUV[b] = uv; const temp = this.temperature[a]; this.temperature[a] = this.temperature[b]; this.temperature[b] = temp; const fusion = this.fusionHeat[a]; this.fusionHeat[a] = this.fusionHeat[b]; this.fusionHeat[b] = fusion; const exposure = this.ignitionExposure[a]; this.ignitionExposure[a] = this.ignitionExposure[b]; this.ignitionExposure[b] = exposure; this.updateIgnitionMembership(a); this.updateIgnitionMembership(b); this.updateOccupied(a); this.updateOccupied(b); this.moved[a] = this.moved[b] = 1; }
   private adjacent(i: number) {
     const x = i % this.width;
-    return [x > 0 ? i - 1 : -1, x < this.width - 1 ? i + 1 : -1, i >= this.width ? i - this.width : -1, i + this.width < this.cells.length ? i + this.width : -1].filter(n => n >= 0);
+    return [x > 0 ? i - 1 : -1, x < this.width - 1 ? i + 1 : -1, i >= this.width ? i - this.width : -1, i + this.width < this.#cells.length ? i + this.width : -1].filter(n => n >= 0);
   }
   private groupSolids() {
     if (this.groupedRevision !== this.solidRevision) {
       const previous = this.solidGroups;
       this.nextOwners.fill(0); this.solidGroups = [];
-      for (let i = this.cells.length - 1; i >= 0; i--) {
-        if (this.nextOwners[i] || this.materials[this.cells[i]].state !== 'Solid') continue;
-        const type = this.cells[i], group = [i], id = this.solidGroups.length + 1;
+      for (let i = this.#cells.length - 1; i >= 0; i--) {
+        if (this.nextOwners[i] || this.materials[this.#cells[i]].state !== 'Solid') continue;
+        const type = this.#cells[i], group = [i], id = this.solidGroups.length + 1;
         this.nextOwners[i] = id;
         for (let q = 0; q < group.length; q++) for (let side = 0; side < 4; side++) {
           const cell = group[q], x = cell % this.width;
           const n = side === 0 ? (x ? cell - 1 : -1) : side === 1 ? (x + 1 < this.width ? cell + 1 : -1) : side === 2 ? cell - this.width : cell + this.width;
-          if (n >= 0 && n < this.cells.length && !this.nextOwners[n] && this.cells[n] === type) { this.nextOwners[n] = id; group.push(n); }
+          if (n >= 0 && n < this.#cells.length && !this.nextOwners[n] && this.#cells[n] === type) { this.nextOwners[n] = id; group.push(n); }
         }
         group.sort((a, b) => b - a);
         const rows: SolidBody['rows'] = [];
@@ -115,14 +160,14 @@ export class Simulation {
       for (let g = 0; g < this.solidGroups.length; g++) {
         const body = this.solidGroups[g], id = g + 1;
         body.top = body.cells.filter(i => i < this.width || this.owners[i - this.width] !== id);
-        body.bottom = body.cells.filter(i => i + this.width >= this.cells.length || this.owners[i + this.width] !== id);
+        body.bottom = body.cells.filter(i => i + this.width >= this.#cells.length || this.owners[i + this.width] !== id);
       }
       this.groupedRevision = this.solidRevision;
     }
   }
   private fluidDensity(i: number) {
-    if (i < 0 || i >= this.cells.length) return 0;
-    const t = this.cells[i];
+    if (i < 0 || i >= this.#cells.length) return 0;
+    const t = this.#cells[i];
     return this.materials[t].state === 'Liquid' ? this.materials[t].density / 1000 : 0;
   }
   private buoyancy(body: SolidBody) {
@@ -137,8 +182,8 @@ export class Simulation {
       const left = row.left % this.width > 0 ? row.left - 1 : -1;
       const right = row.right % this.width < this.width - 1 ? row.right + 1 : -1;
       const a = this.fluidDensity(left), b = this.fluidDensity(right);
-      const wallA = left >= 0 && this.materials[this.cells[left]].state === 'Solid';
-      const wallB = right >= 0 && this.materials[this.cells[right]].state === 'Solid';
+      const wallA = left >= 0 && this.materials[this.#cells[left]].state === 'Solid';
+      const wallB = right >= 0 && this.materials[this.#cells[right]].state === 'Solid';
       const density = a && b ? (a + b) / 2 : a ? a * (wallB ? 1 : .5) : b ? b * (wallA ? 1 : .5) : wallA && wallB ? enclosedDensity : 0;
       const mass = row.count * density;
       displaced += mass; momentX += mass * ((row.left % this.width + row.right % this.width) / 2);
@@ -153,10 +198,10 @@ export class Simulation {
       const contacts = new Map<number, number>(); let contactCount = 0;
       for (const i of this.solidGroups[g].bottom) {
         const n = i + this.width;
-        if (n >= this.cells.length) { contactCount++; continue; }
+        if (n >= this.#cells.length) { contactCount++; continue; }
         const owner = this.owners[n];
         if (owner && owner !== g + 1) { contacts.set(owner - 1, (contacts.get(owner - 1) || 0) + 1); contactCount++; }
-        else if (this.materials[this.cells[n]].state === 'Powder') contactCount++;
+        else if (this.materials[this.#cells[n]].state === 'Powder') contactCount++;
       }
       for (const [support, count] of contacts) above[support].push({ id: g, fraction: count / contactCount });
     }
@@ -183,7 +228,7 @@ export class Simulation {
       moving.add(g);
       for (const i of this.solidGroups[g].top) {
         const n = i - this.width;
-        if (n < 0 || this.materials[this.cells[n]].state === 'Powder') return false;
+        if (n < 0 || this.materials[this.#cells[n]].state === 'Powder') return false;
         const owner = this.owners[n];
         if (owner && owner !== g + 1 && !collect(owner - 1)) return false;
       }
@@ -202,7 +247,7 @@ export class Simulation {
       if (body.pose) for (const point of body.pose) { point.y--; point.cell -= this.width; }
       if (g !== id) { body.velocity = this.solidGroups[id].velocity; body.travel = 0; }
       body.movedTick = this.ticks;
-      for (const i of body.cells) if (this.adjacent(i).some(n => this.cells[n] === body.type && this.owners[n] !== g + 1)) { this.solidRevision++; break; }
+      for (const i of body.cells) if (this.adjacent(i).some(n => this.#cells[n] === body.type && this.owners[n] !== g + 1)) { this.solidRevision++; break; }
     }
     this.revision++; return true;
   }
@@ -212,7 +257,7 @@ export class Simulation {
     const powder: number[] = [], pushes: [number, number][] = [], reserved = new Set<number>();
     for (const i of boundary) {
       const n = i + delta;
-      if (n < 0 || n >= this.cells.length) { if (direction > 0) this.registerImpact(body); return false; }
+      if (n < 0 || n >= this.#cells.length) { if (direction > 0) this.registerImpact(body); return false; }
       const owner = this.owners[n];
       if (owner && owner !== id + 1) {
         if (direction < 0 && body.buoyantLoad > body.load) return this.liftStack(id);
@@ -220,15 +265,15 @@ export class Simulation {
         if (direction > 0) this.registerImpact(body, other);
         const shared = (body.mass * body.velocity + other.mass * other.velocity) / (body.mass + other.mass);
         if (direction > 0 && shared > 0) other.velocity = shared;
-        if (direction > 0 && !other.bottom.some(i => i + this.width >= this.cells.length)) body.collisionVelocity = Math.max(0, shared);
+        if (direction > 0 && !other.bottom.some(i => i + this.width >= this.#cells.length)) body.collisionVelocity = Math.max(0, shared);
         return false;
       }
-      if (this.materials[this.cells[n]].state === 'Powder') powder.push(n);
+      if (this.materials[this.#cells[n]].state === 'Powder') powder.push(n);
     }
     // A body's available force must overcome the mass of the loose particles
     // it pushes. No connected solid is erased or treated as a loose particle.
     const force = direction * (body.load - body.buoyantLoad) + body.mass * Math.max(0, direction * body.velocity) * .5;
-    const resistance = powder.reduce((sum, i) => sum + this.materials[this.cells[i]].density / 1000, 0) * 2;
+    const resistance = powder.reduce((sum, i) => sum + this.materials[this.#cells[i]].density / 1000, 0) * 2;
     if (powder.length && force <= resistance) return false;
     for (const i of powder) {
       const x = i % this.width; let target = -1;
@@ -239,15 +284,15 @@ export class Simulation {
         if (blockedSides.has(side)) continue;
         const nx = x + side * distance;
         if (nx < 0 || nx >= this.width) continue;
-        const n = i + side * distance, t = this.cells[n];
+        const n = i + side * distance, t = this.#cells[n];
         if (this.materials[t].state === 'Solid') { blockedSides.add(side); continue; }
-        if (reserved.has(n) || (n - delta >= 0 && n - delta < this.cells.length && this.owners[n - delta] === id + 1)) continue;
-        if (!t || ((this.materials[t].state === 'Liquid' || this.materials[t].state === 'Gas') && this.materials[t].density < this.materials[this.cells[i]].density)) { target = n; break; }
+        if (reserved.has(n) || (n - delta >= 0 && n - delta < this.#cells.length && this.owners[n - delta] === id + 1)) continue;
+        if (!t || ((this.materials[t].state === 'Liquid' || this.materials[t].state === 'Gas') && this.materials[t].density < this.materials[this.#cells[i]].density)) { target = n; break; }
       }
       // Trapped loose rubble is displaced through the body's vacated cells,
       // like fluid, when the available weight already exceeds its resistance.
       // It must not become an immovable anchor in an otherwise empty scene.
-      if (target < 0 && this.materials[this.cells[i]].displaceWhenTrapped) continue;
+      if (target < 0 && this.materials[this.#cells[i]].displaceWhenTrapped) continue;
       if (target < 0) return false;
       reserved.add(target); pushes.push([i, target]);
     }
@@ -265,10 +310,10 @@ export class Simulation {
     body.movedTick = this.ticks;
     if (direction > 0) for (const i of body.bottom) {
       const n = i + this.width;
-      if (n >= this.cells.length) this.registerImpact(body);
+      if (n >= this.#cells.length) this.registerImpact(body);
       else if (this.owners[n] && this.owners[n] !== id + 1) this.registerImpact(body, this.solidGroups[this.owners[n] - 1]);
     }
-    for (const i of body.cells) if (this.adjacent(i).some(n => this.cells[n] === body.type && this.owners[n] !== id + 1)) { this.solidRevision++; break; }
+    for (const i of body.cells) if (this.adjacent(i).some(n => this.#cells[n] === body.type && this.owners[n] !== id + 1)) { this.solidRevision++; break; }
     return true;
   }
   private solidGravity() {
@@ -295,7 +340,7 @@ export class Simulation {
     if (this.ticks % 3 === 0) for (let g = 0; g < this.solidGroups.length; g++) this.tipBody(g);
     for (const body of this.pendingShatter) {
       const failure = this.materials[body.type].failure!.impact!;
-      for (const i of body.cells) if (this.cells[i] === body.type) {
+      for (const i of body.cells) if (this.#cells[i] === body.type) {
         const temp = this.temperature[i]; this.change(i, this.materialId(failure.output)); this.temperature[i] = temp; this.count(failure.counter);
       }
     }
@@ -323,7 +368,7 @@ export class Simulation {
     let left = Infinity, right = -Infinity, supportY = 0;
     for (const i of body.bottom) {
       const n = i + this.width;
-      if (n >= this.cells.length || (this.owners[n] && this.owners[n] !== id + 1) || (n < this.cells.length && this.materials[this.cells[n]].state === 'Powder')) {
+      if (n >= this.#cells.length || (this.owners[n] && this.owners[n] !== id + 1) || (n < this.#cells.length && this.materials[this.#cells[n]].state === 'Powder')) {
         left = Math.min(left, i % this.width); right = Math.max(right, i % this.width); supportY = Math.max(supportY, Math.floor(i / this.width) + .5);
       }
     }
@@ -356,7 +401,7 @@ export class Simulation {
       for (let radius = 0; radius <= 2 && target < 0; radius++) {
         for (let yy = ry - radius; yy <= ry + radius; yy++) for (let xx = rx - radius; xx <= rx + radius; xx++) {
           if (xx < 0 || xx >= this.width || yy < 0 || yy >= this.height) continue;
-          const n = yy * this.width + xx, t = this.cells[n];
+          const n = yy * this.width + xx, t = this.#cells[n];
           if (reserved.has(n) || (this.owners[n] !== id + 1 && t && this.materials[t].state !== 'Liquid' && this.materials[t].state !== 'Gas')) continue;
           const distance = (xx - x) ** 2 + (yy - y) ** 2;
           if (distance < best) { best = distance; target = n; }
@@ -365,11 +410,11 @@ export class Simulation {
       if (target < 0 || Math.abs(target % this.width - x) > 2 || Math.abs(Math.floor(target / this.width) - y) > 2) { body.angularVelocity = 0; return; }
       reserved.add(target); candidates.push({ x, y, cell: target, old: point.cell });
     }
-    const record = (i: number) => ({ type: this.cells[i], life: this.life[i], uv: this.surfaceUV[i], temp: this.temperature[i], fusion: this.fusionHeat[i], exposure: this.ignitionExposure[i] });
+    const record = (i: number) => ({ type: this.#cells[i], life: this.life[i], uv: this.surfaceUV[i], temp: this.temperature[i], fusion: this.fusionHeat[i], exposure: this.ignitionExposure[i] });
     const matter = candidates.map(p => record(p.old));
     const displaced = candidates.filter(p => this.owners[p.cell] !== id + 1).map(p => record(p.cell));
     const vacated = body.cells.filter(i => !reserved.has(i));
-    const put = (i: number, r: ReturnType<typeof record>) => { this.cells[i] = r.type; this.updateIgnitionMembership(i); this.updateOccupied(i); this.life[i] = r.life; this.surfaceUV[i] = r.uv; this.temperature[i] = r.temp; this.fusionHeat[i] = r.fusion; this.ignitionExposure[i] = r.exposure; this.moved[i] = 1; };
+    const put = (i: number, r: ReturnType<typeof record>) => { this.#cells[i] = r.type; this.updateIgnitionMembership(i); this.updateOccupied(i); this.life[i] = r.life; this.surfaceUV[i] = r.uv; this.temperature[i] = r.temp; this.fusionHeat[i] = r.fusion; this.ignitionExposure[i] = r.exposure; this.moved[i] = 1; };
     for (const i of body.cells) this.owners[i] = 0;
     for (let q = 0; q < vacated.length; q++) put(vacated[q], displaced[q]);
     for (let q = 0; q < candidates.length; q++) { put(candidates[q].cell, matter[q]); this.owners[candidates[q].cell] = id + 1; }
@@ -381,7 +426,7 @@ export class Simulation {
       else body.rows.push({ left: i, right: i, count: 1 });
     }
     body.top = body.cells.filter(i => i < this.width || this.owners[i - this.width] !== id + 1);
-    body.bottom = body.cells.filter(i => i + this.width >= this.cells.length || this.owners[i + this.width] !== id + 1);
+    body.bottom = body.cells.filter(i => i + this.width >= this.#cells.length || this.owners[i + this.width] !== id + 1);
     // Rotation can open voxel gaps as coordinates are rounded. Recheck bonds
     // before the next gravity pass so disconnected islands cannot remain pinned
     // to a grounded part through stale component membership.
@@ -396,32 +441,32 @@ export class Simulation {
   bodyAt(x: number, y: number): BodyInfo | null {
     if (x < 0 || y < 0 || x >= this.width || y >= this.height) return null;
     const i = y * this.width + x;
-    if (this.materials[this.cells[i]].state !== 'Solid') return null;
+    if (this.materials[this.#cells[i]].state !== 'Solid') return null;
     this.groupSolids(); return this.describeBody(this.solidGroups[this.owners[i] - 1]);
   }
   bodySummaries(limit = 8) { this.groupSolids(); return this.solidGroups.slice(0, limit).map(body => this.describeBody(body)); }
   temperatureAt(x: number, y: number) {
     if (x < 0 || y < 0 || x >= this.width || y >= this.height) return 0;
     const i = y * this.width + x;
-    return this.cells[i] ? this.temperature[i] : this.thermal.at(x, y);
+    return this.#cells[i] ? this.temperature[i] : this.thermal.at(x, y);
   }
   private transferHeat() {
     if (this.ticks % THERMAL_INTERVAL) return;
-    if (!this.thermal.update(this.cells, this.temperature, this.width, this.materials)) {
+    if (!this.thermal.update(this.#cells, this.temperature, this.width, this.materials)) {
       return;
     }
     // Double buffering prevents scan direction from deciding which side heats first.
     this.nextTemperature.set(this.temperature);
     for (let y = 0; y < this.height; y++) for (let x = 0; x < this.width; x++) {
-      const i = y * this.width + x, type = this.cells[i];
+      const i = y * this.width + x, type = this.#cells[i];
       if (!type || this.materials[type].thermal.source) continue;
       const temp = this.temperature[i], { capacity, airTransfer, phaseChange } = this.materials[type].thermal;
       let exchange = 0, exposed = false;
       for (let side = 0; side < 4; side++) {
         const n = side === 0 ? (x ? i - 1 : -1) : side === 1 ? (x + 1 < this.width ? i + 1 : -1) : side === 2 ? (y ? i - this.width : -1) : (y + 1 < this.height ? i + this.width : -1);
-        if (n < 0 || !this.cells[n] || this.materials[this.cells[n]].state === 'Gas') { exposed = true; continue; }
+        if (n < 0 || !this.#cells[n] || this.materials[this.#cells[n]].state === 'Gas') { exposed = true; continue; }
         // The less conductive participant limits exchange.
-        const conductivity = Math.min(this.materials[type].thermal.conductivity, this.materials[this.cells[n]].thermal.conductivity);
+        const conductivity = Math.min(this.materials[type].thermal.conductivity, this.materials[this.#cells[n]].thermal.conductivity);
         exchange += conductivity * (this.temperature[n] - temp);
       }
       if (exposed || this.materials[type].state === 'Gas') exchange += airTransfer * (this.thermal.at(x, y) - temp);
@@ -432,8 +477,8 @@ export class Simulation {
       this.nextTemperature[i] = next;
     }
     this.temperature.set(this.nextTemperature);
-    for (let i = 0; i < this.cells.length; i++) {
-      const phase = this.materials[this.cells[i]].thermal.phaseChange;
+    for (let i = 0; i < this.#cells.length; i++) {
+      const phase = this.materials[this.#cells[i]].thermal.phaseChange;
       if (phase && this.fusionHeat[i] >= phase.heat) { this.change(i, this.materialId(phase.output)); this.count(phase.counter); }
     }
   }
@@ -447,11 +492,11 @@ export class Simulation {
         const bit = word & -word;
         word &= word - 1;
         const i = (wordIndex << 5) + 31 - Math.clz32(bit);
-        const ignition = this.materials[this.cells[i]].thermal.heatIgnition;
+        const ignition = this.materials[this.#cells[i]].thermal.heatIgnition;
         if (!ignition) continue;
         this.ignitionExposure[i] = this.temperature[i] >= ignition.point ? Math.min(65535, this.ignitionExposure[i] + 1) : 0;
         if (this.ignitionExposure[i] >= ignition.holdTicks) { this.change(i, this.materialId(ignition.output)); this.count(ignition.counter); }
-        if (!this.materials[this.cells[i]].thermal.heatIgnition) this.ignitionBits[wordIndex] &= ~bit;
+        if (!this.materials[this.#cells[i]].thermal.heatIgnition) this.ignitionBits[wordIndex] &= ~bit;
       }
     }
     this.evaluatingIgnition = false;
@@ -462,7 +507,7 @@ export class Simulation {
       if (!failure || this.ticks % failure.interval || body.cells.length < failure.minCells) continue;
       const supports = body.bottom.filter(i => {
         const n = i + this.width;
-        return n >= this.cells.length || (this.owners[n] && this.owners[n] !== id + 1) || (n < this.cells.length && this.materials[this.cells[n]].state === 'Powder');
+        return n >= this.#cells.length || (this.owners[n] && this.owners[n] !== id + 1) || (n < this.#cells.length && this.materials[this.#cells[n]].state === 'Powder');
       });
       const key = `${body.load}:${body.angle}:${body.cells[0]}:${supports.join(',')}`;
       if (key === body.stressKey) continue;
@@ -488,18 +533,18 @@ export class Simulation {
       const x = ((reverse ? this.rowWordCount - 1 - wordOffset : wordOffset) << 5) + 31 - Math.clz32(bit);
       if (x >= this.width) continue;
       const i = y * this.width + x;
-      if (!this.cells[i] || this.moved[i]) continue;
-      let t = this.cells[i];
+      if (!this.#cells[i] || this.moved[i]) continue;
+      let t = this.#cells[i];
       const neighbors = this.registry.actors[t] ? this.adjacent(i) : noNeighbors;
       let stop = false;
       for (const n of neighbors) {
-        for (const rule of this.registry.rules[t][this.cells[n]]) {
+        for (const rule of this.registry.rules[t][this.#cells[n]]) {
           const condition = rule.conditions;
           if (condition?.minTemperature !== undefined && this.temperature[i] < condition.minTemperature) continue;
           if (condition?.maxTemperature !== undefined && this.temperature[i] > condition.maxTemperature) continue;
           if (condition?.probability !== undefined && this.random() >= condition.probability) continue;
           for (const output of rule.outputs) {
-            const target = output.target === 'self' ? i : output.target === 'neighbor' ? n : neighbors.find(k => !this.cells[k]);
+            const target = output.target === 'self' ? i : output.target === 'neighbor' ? n : neighbors.find(k => !this.#cells[k]);
             if (target !== undefined) this.change(target, output.material);
           }
           this.count(rule.counter);
@@ -507,13 +552,13 @@ export class Simulation {
         }
         if (stop) break;
       }
-      t = this.cells[i]; if (this.moved[i]) continue;
+      t = this.#cells[i]; if (this.moved[i]) continue;
       const lifetime = this.materials[t].lifetime;
       if (lifetime) {
         if (this.life[i] > 0) this.life[i]--;
         if (!this.life[i]) { this.change(i, this.materialId(lifetime.output)); this.count(lifetime.counter); continue; }
         const spawn = lifetime.spawnAbove;
-        if (spawn && this.random() < spawn.chance && y > 0 && !this.cells[i - this.width]) this.change(i - this.width, this.materialId(spawn.output));
+        if (spawn && this.random() < spawn.chance && y > 0 && !this.#cells[i - this.width]) this.change(i - this.width, this.materialId(spawn.output));
       }
       const state = this.materials[t].state;
       if (state === 'Solid') continue;
@@ -526,7 +571,7 @@ export class Simulation {
       if (motion?.pauseChance !== undefined && this.random() < motion.pauseChance) continue;
       if (motion?.stepEvery && this.ticks % motion.stepEvery) continue;
       const canMove = (n: number) => {
-        const other = this.cells[n];
+        const other = this.#cells[n];
         if (!other) return true;
         const otherState = this.materials[other].state;
         if (otherState !== 'Liquid' && otherState !== 'Gas') return false;
@@ -535,12 +580,12 @@ export class Simulation {
       let dest = -1;
       const upwardChoices = motion?.diagonalFirstChance !== undefined && this.random() < motion.diagonalFirstChance ? [side, 0, -side] : [0, side, -side];
       if (ny >= 0 && ny < this.height) for (const dx of upwardChoices) { const nx = x + dx; if (nx >= 0 && nx < this.width && canMove(ny * this.width + nx)) { dest = ny * this.width + nx; break; } }
-      if (dest < 0 && (state === 'Liquid' || gas)) for (const dx of [side, -side]) { const nx = x + dx; if (nx >= 0 && nx < this.width && !this.cells[y * this.width + nx]) { dest = y * this.width + nx; break; } }
+      if (dest < 0 && (state === 'Liquid' || gas)) for (const dx of [side, -side]) { const nx = x + dx; if (nx >= 0 && nx < this.width && !this.#cells[y * this.width + nx]) { dest = y * this.width + nx; break; } }
       if (dest >= 0) this.swap(i, dest);
       }
     }
     this.solidGravity();
     this.fractureSolids();
   }
-  counts() { const result: Record<string, number> = {}; for (const t of this.cells) if (t) result[this.materials[t].name] = (result[this.materials[t].name] || 0) + 1; return result; }
+  counts() { const result: Record<string, number> = {}; for (const t of this.#cells) if (t) result[this.materials[t].name] = (result[this.materials[t].name] || 0) + 1; return result; }
 }

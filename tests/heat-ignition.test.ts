@@ -80,7 +80,7 @@ test('Particle Lab grass and wood ignite across separate air gaps', () => {
 test('heat ignition replays deterministically from the same seed', () => {
   const a = new Simulation(), b = new Simulation();
   for (const s of [a, b]) { s.load('ignite'); for (let i = 0; i < 180; i++) s.step(); }
-  assert.deepEqual(a.cells, b.cells);
+  assert.deepEqual(a.copyCells(), b.copyCells());
   assert.deepEqual(a.temperature, b.temperature);
   assert.deepEqual(a.reactions, b.reactions);
   assert.equal(a.random(), b.random());

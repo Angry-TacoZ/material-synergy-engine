@@ -165,12 +165,12 @@ class SandboxScene extends Phaser.Scene {
     this.drawnTick = sim.ticks; this.drawnRevision = sim.revision;
     const vapor = this.vaporData.data;
     vapor.fill(0);
-    this.materialRenderer.render(this.imageData, sim);
+    const cells = this.materialRenderer.render(this.imageData, sim);
     let hasSteam = false;
-    for (let i = 0; i < sim.cells.length; i++) {
-      if (sim.cells[i] === M.Steam || sim.cells[i] === M.Smoke) {
+    for (let i = 0; i < cells.length; i++) {
+      if (cells[i] === M.Steam || cells[i] === M.Smoke) {
         hasSteam = true;
-        const smoke = sim.cells[i] === M.Smoke;
+        const smoke = cells[i] === M.Smoke;
         vapor[i * 4] = smoke ? 87 : 235; vapor[i * 4 + 1] = smoke ? 97 : 244; vapor[i * 4 + 2] = smoke ? 112 : 250;
         vapor[i * 4 + 3] = (smoke ? 130 : 170) * Math.min(1, sim.life[i] / (smoke ? 100 : 180));
       }

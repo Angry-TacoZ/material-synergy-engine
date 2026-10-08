@@ -27,6 +27,7 @@ export class MaterialRenderer {
   private backgroundImage: Uint8ClampedArray;
   private lightBounds = { left: 0, right: -1, top: 0, bottom: -1 };
   private sky: Uint8ClampedArray;
+  private cells: Uint8Array;
   private solid = new Uint8Array(materials.length);
 
   constructor(private width: number, private height: number) {
@@ -36,6 +37,7 @@ export class MaterialRenderer {
     this.background = new Uint8ClampedArray(width * height * 3);
     this.backgroundImage = new Uint8ClampedArray(width * height * 4);
     this.sky = new Uint8ClampedArray(height * 3);
+    this.cells = new Uint8Array(width * height);
     for (let t = 0; t < materials.length; t++) if (materials[t].state === 'Solid') this.solid[t] = 1;
     for (let y = 0; y < height; y++) {
       this.sky[y * 3] = 18 + y / height * 8; this.sky[y * 3 + 1] = 27 + y / height * 11; this.sky[y * 3 + 2] = 36 + y / height * 14;
@@ -137,8 +139,9 @@ export class MaterialRenderer {
   }
 
   render(image: ImageData, sim: Simulation) {
-    this.updateLight(sim.cells);
-    const pixels = image.data, cells = sim.cells, w = this.width;
+    sim.copyCellsTo(this.cells);
+    this.updateLight(this.cells);
+    const pixels = image.data, cells = this.cells, w = this.width;
     pixels.set(this.backgroundImage);
     const bounds = this.lightBounds;
     const empty = (t: number) => t === M.Empty || t === M.Steam || t === M.Smoke;
@@ -189,5 +192,6 @@ export class MaterialRenderer {
       const gain = empty(t) ? 1 : .65;
       pixels[p] = r + glow * 155 * gain; pixels[p + 1] = g + glow * 69 * gain; pixels[p + 2] = b + glow * 15 * gain; pixels[p + 3] = 255;
     }
+    return this.cells;
   }
 }

@@ -10,7 +10,7 @@ test('material rendering leaves simulation state and random sequence untouched',
   s.load('landscape'); reference.load('landscape');
   const pixels = image(96, 96), renderer = new MaterialRenderer(96, 96);
   renderer.render(pixels, s); renderer.render(pixels, s);
-  assert.deepEqual(s.cells, reference.cells); assert.deepEqual(s.life, reference.life);
+  assert.deepEqual(s.copyCells(), reference.copyCells()); assert.deepEqual(s.life, reference.life);
   assert.deepEqual(s.surfaceUV, reference.surfaceUV);
   assert.equal(s.ticks, 0); assert.equal(s.random(), reference.random());
   assert.ok(pixels.data.some(v => v > 0));

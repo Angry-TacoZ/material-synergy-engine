@@ -35,6 +35,6 @@ test('temperature follows falling pieces and clearing removes residual heat', ()
 
 test('thermal updates stay bounded and are deterministic', () => {
   const a = scene(16), b = scene(16); step(a, 180); step(b, 180);
-  assert.deepEqual(a.cells, b.cells); assert.deepEqual(a.temperature, b.temperature);
+  assert.deepEqual(a.copyCells(), b.copyCells()); assert.deepEqual(a.temperature, b.temperature);
   assert.ok(a.temperature.every(t => Number.isFinite(t) && t >= -10 && t <= 1200));
 });
