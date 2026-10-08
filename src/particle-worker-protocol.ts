@@ -10,13 +10,27 @@ export type ParticleInspection = {
   material: number;
 };
 
+export type ParticleWorkerPoint = { x: number; y: number };
+
+export type ParticleWorkerPaintStroke = {
+  radius: number;
+  material: number;
+  points: ParticleWorkerPoint[];
+};
+
+export type ParticleWorkerInput = {
+  type: 'input';
+  id: number;
+  strokes: ParticleWorkerPaintStroke[];
+  cursor?: ParticleWorkerPoint;
+};
+
 export type ParticleWorkerCommand =
-  | { type: 'paint'; x: number; y: number; radius: number; material: number }
-  | { type: 'cursor'; x: number; y: number }
+  | ParticleWorkerInput
   | { type: 'scene'; id: number; preset: string }
   | { type: 'clear'; id: number }
-  | { type: 'pause'; paused: boolean }
-  | { type: 'speed'; speed: number }
+  | { type: 'pause'; id: number; paused: boolean }
+  | { type: 'speed'; id: number; speed: number }
   | { type: 'step'; id: number }
   | { type: 'advance'; id: number; milliseconds: number }
   | { type: 'inspect'; id: number; x: number; y: number };

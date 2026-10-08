@@ -10,6 +10,7 @@ const fahrenheit = (celsius: number) => Math.round(celsius * 9 / 5 + 32);
 const sim = new ParticleWorkerClient();
 let latestInspection: ParticleInspection = { ticks: 0, counts: {}, reactions: {}, bodies: [], body: null, temperature: 0, material: M.Empty };
 let selected = M.Sand, brush = 16, paused = false, speed = 1, erasing = false, panning = false;
+let workerFailureReported = false;
 let cursor = { x: 120, y: 50 }, keyboardCursor = false;
 const app = document.querySelector<HTMLDivElement>('#app')!;
 app.innerHTML = `
@@ -51,7 +52,7 @@ function detail() {
 }
 function updateToolButtons() { for (const [id, active] of [['paint', !panning && !erasing], ['erase', !panning && erasing], ['pan', panning]] as const) { el(id).classList.toggle('active', active); el(id).setAttribute('aria-pressed', String(active)); } }
 function setErase(value: boolean) { erasing = value; panning = false; updateToolButtons(); }
-function setPause(value: boolean) { paused = value; sim.setPaused(value); el('pause').innerHTML = value ? '▶ <span>Play</span>' : 'Ⅱ <span>Pause</span>'; el('pause').setAttribute('aria-label', value ? 'Play simulation' : 'Pause simulation'); el('status').textContent = value ? 'Simulation paused' : 'Simulation running'; el('status-dot').classList.toggle('paused', value); }
+function setPause(value: boolean) { if (workerFailureReported) return; paused = value; sim.setPaused(value); el('pause').innerHTML = value ? '▶ <span>Play</span>' : 'Ⅱ <span>Pause</span>'; el('pause').setAttribute('aria-label', value ? 'Play simulation' : 'Pause simulation'); el('status').textContent = value ? 'Simulation paused' : 'Simulation running'; el('status-dot').classList.toggle('paused', value); }
 el('search').oninput = palette;
 document.querySelectorAll<HTMLButtonElement>('[data-filter]').forEach(b => b.onclick = () => { filter = b.dataset.filter!; document.querySelectorAll('[data-filter]').forEach(x => x.classList.toggle('active', x === b)); palette(); });
 el('paint').onclick = () => setErase(false); el('erase').onclick = () => setErase(true); el('pan').onclick = () => { panning = true; updateToolButtons(); };
@@ -79,7 +80,18 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && document.activeElement === el('game')) { e.preventDefault(); if (!panning) sim.paint(cursor.x, cursor.y, brush, erasing ? 0 : selected); }
 });
 
-function reportWorkerError(error: unknown) { console.error(error); el('status').textContent = 'Simulation worker unavailable'; el('status-dot').classList.add('paused'); }
+function reportWorkerError(error: unknown) {
+  if (workerFailureReported) return;
+  workerFailureReported = true;
+  paused = true;
+  console.error('Particle simulation stopped:', error);
+  el('status').textContent = 'Simulation unavailable · reload to restart';
+  el('status-dot').classList.add('paused');
+  document.querySelectorAll<HTMLButtonElement>('#paint, #erase, #pan, #pause, #step, #clear, [data-scene]').forEach(button => { button.disabled = true; });
+  document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('#brush, #speed').forEach(control => { control.disabled = true; });
+}
+sim.setFailureHandler(reportWorkerError);
+window.addEventListener('pagehide', () => sim.dispose(), { once: true });
 async function updateStats() {
   const state = await sim.inspect(cursor.x, cursor.y);
   latestInspection = state;

@@ -75,13 +75,16 @@ scope.addEventListener('message', event => {
   const command = event.data;
   try {
     switch (command.type) {
-      case 'paint':
-        initialized = true;
-        sim.paint(command.x, command.y, command.radius, command.material);
-        break;
-      case 'cursor':
-        cursor = { x: command.x, y: command.y };
-        scope.postMessage({ type: 'cursor', material: sim.cells[cursor.y * WIDTH + cursor.x] });
+      case 'input':
+        if (command.strokes.length) initialized = true;
+        for (const stroke of command.strokes) {
+          for (const point of stroke.points) sim.paint(point.x, point.y, stroke.radius, stroke.material);
+        }
+        if (command.cursor) {
+          cursor = command.cursor;
+          scope.postMessage({ type: 'cursor', material: sim.cells[cursor.y * WIDTH + cursor.x] });
+        }
+        acknowledge(command.id);
         break;
       case 'scene':
         initialized = true;
@@ -95,9 +98,11 @@ scope.addEventListener('message', event => {
       case 'pause':
         paused = command.paused;
         if (paused) accumulator = 0;
+        acknowledge(command.id);
         break;
       case 'speed':
         speed = command.speed;
+        acknowledge(command.id);
         break;
       case 'step':
         initialized = true;
