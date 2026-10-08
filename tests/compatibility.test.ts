@@ -15,5 +15,5 @@ for (const fixture of fixtures) test(`pre-migration behavior is identical: ${fix
   const s = new Simulation(legacyConfig, fixture.width, fixture.height, 42); loadScene(s, fixture.preset);
   for (const [x, y, type] of fixture.placements) s.set(x, y, type);
   for (let tick = 0; tick < fixture.ticks; tick++) s.step();
-  assert.deepEqual({ cells: digest(s.cells), life: digest(s.life), temperature: digest(s.temperature), uv: digest(s.surfaceUV), counts: s.counts(), reactions: s.reactions, nextRandom: s.random() }, fixture.expected);
+  assert.deepEqual({ cells: digest(s.copyCells()), life: digest(s.life), temperature: digest(s.temperature), uv: digest(s.surfaceUV), counts: s.counts(), reactions: s.reactions, nextRandom: s.random() }, fixture.expected);
 });

@@ -31,9 +31,9 @@ function keyboard(sim: Simulation, erasing: boolean, panning: boolean) {
 for (const erasing of [false, true]) test(`${erasing ? 'Erase' : 'Paint'} → Pan → Enter preserves the experiment`, () => {
   const sim = new Simulation(80, 80);
   if (erasing) sim.paint(40, 40, 16, M.Sand);
-  const before = sim.cells.slice(), revision = sim.revision;
+  const before = sim.copyCells(), revision = sim.revision;
   keyboard(sim, erasing, true);
-  assert.deepEqual(sim.cells, before);
+  assert.deepEqual(sim.copyCells(), before);
   assert.equal(sim.revision, revision);
 });
 

@@ -34,7 +34,7 @@ test('water extinguishes fire and oil ignites', () => {
 });
 test('water settles below oil, and trapped steam condenses', () => {
   const s = new Simulation(5, 5); s.set(2, 3, M.Water); s.set(2, 4, M.Oil); s.step(); assert.equal(s.cells[4 * 5 + 2], M.Water);
-  s.clear(); s.cells.fill(M.Stone); s.set(2, 2, M.Steam); s.life[2 * 5 + 2] = 1; s.step(); assert.equal(s.cells[2 * 5 + 2], M.Water);
+  s.clear(); s.fill(M.Stone); s.set(2, 2, M.Steam); s.life[2 * 5 + 2] = 1; s.step(); assert.equal(s.cells[2 * 5 + 2], M.Water);
 });
 
 test('steam rises and disperses without disappearing inside the workspace', () => {
@@ -58,7 +58,7 @@ test('powders and solids fall, painting preserves matter, erasing clears', () =>
 test('seeded simulation is reproducible and remains in bounds', () => {
   const a = new Simulation(), b = new Simulation(); a.load('landscape'); b.load('landscape');
   for (let i = 0; i < 200; i++) { a.step(); b.step(); }
-  assert.deepEqual(a.cells, b.cells); assert.ok(a.cells.every(t => t <= M.Shards));
+  assert.deepEqual(a.copyCells(), b.copyCells()); assert.ok(a.cells.every(t => t <= M.Shards));
   a.clear(); assert.equal(Object.keys(a.counts()).length, 0); assert.equal(a.reactions.ignition, 0);
 });
 

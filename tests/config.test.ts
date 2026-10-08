@@ -73,7 +73,7 @@ test('probabilistic custom reactions replay deterministically and source config 
   const a = new Simulation(config, 8, 8, 123), b = new Simulation(config, 8, 8, 123);
   config.materials[2].thermal.initialTemperature = 999; config.reactions = [];
   for (const s of [a, b]) { s.set(3, 7, 1); s.set(4, 7, 2); for (let i = 0; i < 20; i++) s.step(); }
-  assert.deepEqual(a.cells, b.cells); assert.equal(a.reactions.custom, 1); assert.equal(a.random(), b.random());
+  assert.deepEqual(a.copyCells(), b.copyCells()); assert.equal(a.reactions.custom, 1); assert.equal(a.random(), b.random());
   assert.equal(a.materials[2].thermal.initialTemperature, 0); assert.ok(Object.isFrozen(a.materials[2].thermal));
 });
 
