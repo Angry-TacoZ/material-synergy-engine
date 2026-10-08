@@ -1,0 +1,742 @@
+{
+  "generatedAt": "2026-10-08T09:11:19.553Z",
+  "input": "C:\\Users\\angry\\OneDrive\\Documents\\ChatGPT\\Element sandbox\\output\\performance\\four-way-short-runs-20261008.jsonl",
+  "expectedRows": 32,
+  "rowCount": 32,
+  "complete": true,
+  "matrix": "4 configurations x 4 scenes x 2 repetitions; 15 seconds measured after 5-second warmup.",
+  "scenes": [
+    "empty",
+    "fire",
+    "float",
+    "stress"
+  ],
+  "configurationCommits": {
+    "A": "e32546a130b93288ca67bf427f035d5aff70d9ff",
+    "B": "89d3c9fbd62b95bd4d7102bd71e020b93186407a",
+    "C": "6fdbcc915ef61cfc42d2358e3cd8a6a6df6bfd01",
+    "D": "8edf80c802050502acfa84ca14f9154ea9b51566"
+  },
+  "byScene": {
+    "empty": {
+      "A": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.72231448880622,
+            "uniqueWorldFrameFps": 59.72231448880622,
+            "displayFps": 59.92161031023716,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000000546,
+            "framesOver33ms": 0,
+            "simulationTicks": 899,
+            "startTicks": 0,
+            "endTicks": 899,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.5
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.77842131821879,
+            "uniqueWorldFrameFps": 59.77842131821879,
+            "displayFps": 59.91126225448149,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 17.09999999999991,
+            "framesOver33ms": 0,
+            "simulationTicks": 900,
+            "startTicks": 0,
+            "endTicks": 900,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.899999976158142
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.750367903512505,
+          "uniqueWorldFrameFps": 59.750367903512505,
+          "displayFps": 59.91643628235933,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 899.5
+        }
+      },
+      "B": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.79669124975085,
+            "uniqueWorldFrameFps": 59.79669124975085,
+            "displayFps": 59.9295727858614,
+            "p95FrameMs": 16.799999999999955,
+            "maxFrameMs": 16.899999999999636,
+            "framesOver33ms": 0,
+            "simulationTicks": 900,
+            "startTicks": 0,
+            "endTicks": 900,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.600000023841858
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 58.85283470058786,
+            "uniqueWorldFrameFps": 58.85283470058786,
+            "displayFps": 58.98568534325285,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 250.20000000000027,
+            "framesOver33ms": 1,
+            "simulationTicks": 886,
+            "startTicks": 0,
+            "endTicks": 886,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 5.199999988079071
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.32476297516936,
+          "uniqueWorldFrameFps": 59.32476297516936,
+          "displayFps": 59.457629064557125,
+          "p95FrameMs": 16.800000000000068,
+          "ticks": 893
+        }
+      },
+      "C": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.833714073066204,
+            "uniqueWorldFrameFps": 54.91951336118286,
+            "displayFps": 59.90012219079436,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.899999999999636,
+            "framesOver33ms": 0,
+            "simulationTicks": 901,
+            "startTicks": 0,
+            "endTicks": 901,
+            "errors": [],
+            "workerRequestP95Ms": 12.400000035762787,
+            "paintingInputLatencyMs": 24.200000047683716
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.85441177432229,
+            "uniqueWorldFrameFps": 55.07667602293514,
+            "displayFps": 59.920769215313776,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.80000000000109,
+            "framesOver33ms": 0,
+            "simulationTicks": 902,
+            "startTicks": 0,
+            "endTicks": 902,
+            "errors": [],
+            "workerRequestP95Ms": 13.300000011920929,
+            "paintingInputLatencyMs": 29.80000001192093
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.844062923694246,
+          "uniqueWorldFrameFps": 54.998094692059,
+          "displayFps": 59.910445703054066,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 901.5
+        }
+      },
+      "D": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.82338490140097,
+            "uniqueWorldFrameFps": 56.90193214262001,
+            "displayFps": 59.95617820861828,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000001455,
+            "framesOver33ms": 0,
+            "simulationTicks": 901,
+            "startTicks": 0,
+            "endTicks": 901,
+            "errors": [],
+            "workerRequestP95Ms": 7.399999976158142,
+            "paintingInputLatencyMs": 3.5
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.84007225966252,
+            "uniqueWorldFrameFps": 57.71478667441369,
+            "displayFps": 59.906487434201544,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000001455,
+            "framesOver33ms": 0,
+            "simulationTicks": 901,
+            "startTicks": 0,
+            "endTicks": 901,
+            "errors": [],
+            "workerRequestP95Ms": 7.299999952316284,
+            "paintingInputLatencyMs": 9.399999976158142
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.831728580531745,
+          "uniqueWorldFrameFps": 57.30835940851685,
+          "displayFps": 59.93133282140991,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 901
+        }
+      }
+    },
+    "fire": {
+      "A": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 45.555518716222934,
+            "uniqueWorldFrameFps": 24.336063127880376,
+            "displayFps": 24.468684725307515,
+            "p95FrameMs": 83.5,
+            "maxFrameMs": 100.20000000000073,
+            "framesOver33ms": 244,
+            "simulationTicks": 687,
+            "startTicks": 0,
+            "endTicks": 687,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 11.900000035762787
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 45.035512584707064,
+            "uniqueWorldFrameFps": 22.68308489949269,
+            "displayFps": 22.881479228059682,
+            "p95FrameMs": 100,
+            "maxFrameMs": 100.20000000000073,
+            "framesOver33ms": 252,
+            "simulationTicks": 681,
+            "startTicks": 0,
+            "endTicks": 681,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 11.800000011920929
+          }
+        ],
+        "mean": {
+          "simulationTps": 45.295515650465,
+          "uniqueWorldFrameFps": 23.50957401368653,
+          "displayFps": 23.6750819766836,
+          "p95FrameMs": 91.75,
+          "ticks": 684
+        }
+      },
+      "B": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 47.07611631975748,
+            "uniqueWorldFrameFps": 31.979977753084196,
+            "displayFps": 32.112400021212906,
+            "p95FrameMs": 83.39999999999964,
+            "maxFrameMs": 100.19999999999891,
+            "framesOver33ms": 165,
+            "simulationTicks": 711,
+            "startTicks": 0,
+            "endTicks": 711,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 11.900000035762787
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 47.02360452482578,
+            "uniqueWorldFrameFps": 31.790605875938553,
+            "displayFps": 31.923066733754965,
+            "p95FrameMs": 83.39999999999964,
+            "maxFrameMs": 100.19999999999891,
+            "framesOver33ms": 176,
+            "simulationTicks": 710,
+            "startTicks": 0,
+            "endTicks": 710,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 11.899999976158142
+          }
+        ],
+        "mean": {
+          "simulationTps": 47.04986042229163,
+          "uniqueWorldFrameFps": 31.885291814511376,
+          "displayFps": 32.017733377483935,
+          "p95FrameMs": 83.39999999999964,
+          "ticks": 710.5
+        }
+      },
+      "C": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 44.10374881861508,
+            "uniqueWorldFrameFps": 15.226294234998063,
+            "displayFps": 59.98634883960444,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 18.90000000000009,
+            "framesOver33ms": 0,
+            "simulationTicks": 672,
+            "startTicks": 0,
+            "endTicks": 672,
+            "errors": [],
+            "workerRequestP95Ms": 77.19999998807907,
+            "paintingInputLatencyMs": 104.19999998807907
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 44.430381415672606,
+            "uniqueWorldFrameFps": 15.029861962571744,
+            "displayFps": 59.13064114222304,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 216.89999999999964,
+            "framesOver33ms": 1,
+            "simulationTicks": 674,
+            "startTicks": 0,
+            "endTicks": 674,
+            "errors": [],
+            "workerRequestP95Ms": 80,
+            "paintingInputLatencyMs": 93.19999998807907
+          }
+        ],
+        "mean": {
+          "simulationTps": 44.267065117143844,
+          "uniqueWorldFrameFps": 15.128078098784904,
+          "displayFps": 59.55849499091374,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 673
+        }
+      },
+      "D": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 46.66907680678345,
+            "uniqueWorldFrameFps": 22.08564761560456,
+            "displayFps": 59.94675781378381,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 17,
+            "framesOver33ms": 0,
+            "simulationTicks": 710,
+            "startTicks": 0,
+            "endTicks": 710,
+            "errors": [],
+            "workerRequestP95Ms": 64.60000002384186,
+            "paintingInputLatencyMs": 89
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 47.04954658956499,
+            "uniqueWorldFrameFps": 22.079116835326587,
+            "displayFps": 59.929031410172165,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.90000000000009,
+            "framesOver33ms": 0,
+            "simulationTicks": 716,
+            "startTicks": 0,
+            "endTicks": 716,
+            "errors": [],
+            "workerRequestP95Ms": 68,
+            "paintingInputLatencyMs": 81.40000003576279
+          }
+        ],
+        "mean": {
+          "simulationTps": 46.859311698174224,
+          "uniqueWorldFrameFps": 22.082382225465572,
+          "displayFps": 59.93789461197799,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 713
+        }
+      }
+    },
+    "float": {
+      "A": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 43.86429896633978,
+            "uniqueWorldFrameFps": 19.149218128809967,
+            "displayFps": 19.281738669493773,
+            "p95FrameMs": 66.80000000000109,
+            "maxFrameMs": 83.5,
+            "framesOver33ms": 253,
+            "simulationTicks": 662,
+            "startTicks": 0,
+            "endTicks": 662,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.900000035762787
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 43.86197041477471,
+            "uniqueWorldFrameFps": 18.920849982843993,
+            "displayFps": 19.11932043720949,
+            "p95FrameMs": 66.80000000000109,
+            "maxFrameMs": 83.40000000000146,
+            "framesOver33ms": 252,
+            "simulationTicks": 663,
+            "startTicks": 0,
+            "endTicks": 663,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 7
+          }
+        ],
+        "mean": {
+          "simulationTps": 43.863134690557246,
+          "uniqueWorldFrameFps": 19.03503405582698,
+          "displayFps": 19.20052955335163,
+          "p95FrameMs": 66.80000000000109,
+          "ticks": 662.5
+        }
+      },
+      "B": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 52.360195619734185,
+            "uniqueWorldFrameFps": 22.32617478201864,
+            "displayFps": 22.459068679530656,
+            "p95FrameMs": 66.79999999999927,
+            "maxFrameMs": 66.90000000000055,
+            "framesOver33ms": 277,
+            "simulationTicks": 788,
+            "startTicks": 0,
+            "endTicks": 788,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 7
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 53.05725016402473,
+            "uniqueWorldFrameFps": 22.454941080654663,
+            "displayFps": 22.5874186091541,
+            "p95FrameMs": 66.79999999999927,
+            "maxFrameMs": 66.90000000000146,
+            "framesOver33ms": 282,
+            "simulationTicks": 801,
+            "startTicks": 0,
+            "endTicks": 801,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 7.900000035762787
+          }
+        ],
+        "mean": {
+          "simulationTps": 52.70872289187946,
+          "uniqueWorldFrameFps": 22.39055793133665,
+          "displayFps": 22.52324364434238,
+          "p95FrameMs": 66.79999999999927,
+          "ticks": 794.5
+        }
+      },
+      "C": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 42.07906122193864,
+            "uniqueWorldFrameFps": 14.158056592671059,
+            "displayFps": 59.990649097317835,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000001455,
+            "framesOver33ms": 0,
+            "simulationTicks": 639,
+            "startTicks": 0,
+            "endTicks": 639,
+            "errors": [],
+            "workerRequestP95Ms": 67.39999997615814,
+            "paintingInputLatencyMs": 0.8999999761581421
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 42.41963725263471,
+            "uniqueWorldFrameFps": 14.13987908421157,
+            "displayFps": 59.92930060457894,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000001455,
+            "framesOver33ms": 0,
+            "simulationTicks": 642,
+            "startTicks": 0,
+            "endTicks": 642,
+            "errors": [],
+            "workerRequestP95Ms": 66.40000003576279,
+            "paintingInputLatencyMs": 58.60000002384186
+          }
+        ],
+        "mean": {
+          "simulationTps": 42.24934923728667,
+          "uniqueWorldFrameFps": 14.148967838441315,
+          "displayFps": 59.959974850948385,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 640.5
+        }
+      },
+      "D": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 50.062000369403265,
+            "uniqueWorldFrameFps": 16.687333456467755,
+            "displayFps": 59.95567633173593,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.900000000001455,
+            "framesOver33ms": 0,
+            "simulationTicks": 759,
+            "startTicks": 0,
+            "endTicks": 759,
+            "errors": [],
+            "workerRequestP95Ms": 59.30000001192093,
+            "paintingInputLatencyMs": 48.89999997615814
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 50.32160923499264,
+            "uniqueWorldFrameFps": 16.707830887733778,
+            "displayFps": 59.56704925192043,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 100.5,
+            "framesOver33ms": 1,
+            "simulationTicks": 762,
+            "startTicks": 0,
+            "endTicks": 762,
+            "errors": [],
+            "workerRequestP95Ms": 58.19999998807907,
+            "paintingInputLatencyMs": 56.10000002384186
+          }
+        ],
+        "mean": {
+          "simulationTps": 50.19180480219795,
+          "uniqueWorldFrameFps": 16.697582172100766,
+          "displayFps": 59.76136279182818,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 760.5
+        }
+      }
+    },
+    "stress": {
+      "A": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.082037732796216,
+            "uniqueWorldFrameFps": 50.252924228906444,
+            "displayFps": 50.45207716508441,
+            "p95FrameMs": 33.400000000000546,
+            "maxFrameMs": 50.100000000000364,
+            "framesOver33ms": 129,
+            "simulationTicks": 890,
+            "startTicks": 0,
+            "endTicks": 890,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.899999976158142
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.16334661354582,
+            "uniqueWorldFrameFps": 45.94953519256308,
+            "displayFps": 46.14873837981408,
+            "p95FrameMs": 33.5,
+            "maxFrameMs": 100.10000000000036,
+            "framesOver33ms": 179,
+            "simulationTicks": 891,
+            "startTicks": 0,
+            "endTicks": 891,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.300000011920929
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.12269217317102,
+          "uniqueWorldFrameFps": 48.10122971073476,
+          "displayFps": 48.30040777244925,
+          "p95FrameMs": 33.45000000000027,
+          "ticks": 890.5
+        }
+      },
+      "B": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.67910036586959,
+            "uniqueWorldFrameFps": 59.41356488037072,
+            "displayFps": 59.61271649449487,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 33.400000000000546,
+            "framesOver33ms": 5,
+            "simulationTicks": 899,
+            "startTicks": 0,
+            "endTicks": 899,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 7.199999988079071
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.657864142169075,
+            "uniqueWorldFrameFps": 58.993522670652716,
+            "displayFps": 59.12639096495599,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 33.400000000000546,
+            "framesOver33ms": 12,
+            "simulationTicks": 898,
+            "startTicks": 0,
+            "endTicks": 898,
+            "errors": [],
+            "workerRequestP95Ms": null,
+            "paintingInputLatencyMs": 6.600000023841858
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.66848225401933,
+          "uniqueWorldFrameFps": 59.20354377551172,
+          "displayFps": 59.369553729725425,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 898.5
+        }
+      },
+      "C": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 57.79774093401149,
+            "uniqueWorldFrameFps": 29.922716163551094,
+            "displayFps": 59.97754144923707,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 17,
+            "framesOver33ms": 0,
+            "simulationTicks": 875,
+            "startTicks": 0,
+            "endTicks": 875,
+            "errors": [],
+            "workerRequestP95Ms": 49.90000003576279,
+            "paintingInputLatencyMs": 49.39999997615814
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 58.20444890777637,
+            "uniqueWorldFrameFps": 30.654783533721037,
+            "displayFps": 59.988240190988584,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.90000000000009,
+            "framesOver33ms": 0,
+            "simulationTicks": 881,
+            "startTicks": 0,
+            "endTicks": 881,
+            "errors": [],
+            "workerRequestP95Ms": 45.60000002384186,
+            "paintingInputLatencyMs": 0.19999998807907104
+          }
+        ],
+        "mean": {
+          "simulationTps": 58.001094920893934,
+          "uniqueWorldFrameFps": 30.288749848636066,
+          "displayFps": 59.98289082011283,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 878
+        }
+      },
+      "D": {
+        "runs": [
+          {
+            "repetition": 1,
+            "simulationTps": 59.77377516834179,
+            "uniqueWorldFrameFps": 50.021561017680035,
+            "displayFps": 59.0440176468637,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 250.09999999999997,
+            "framesOver33ms": 1,
+            "simulationTicks": 901,
+            "startTicks": 0,
+            "endTicks": 901,
+            "errors": [],
+            "workerRequestP95Ms": 22.599999964237213,
+            "paintingInputLatencyMs": 2.599999964237213
+          },
+          {
+            "repetition": 2,
+            "simulationTps": 59.774685222001324,
+            "uniqueWorldFrameFps": 48.24387011265739,
+            "displayFps": 59.90722332670643,
+            "p95FrameMs": 16.800000000000182,
+            "maxFrameMs": 16.899999999999864,
+            "framesOver33ms": 0,
+            "simulationTicks": 902,
+            "startTicks": 0,
+            "endTicks": 902,
+            "errors": [],
+            "workerRequestP95Ms": 27.399999976158142,
+            "paintingInputLatencyMs": 26.19999998807907
+          }
+        ],
+        "mean": {
+          "simulationTps": 59.774230195171555,
+          "uniqueWorldFrameFps": 49.13271556516871,
+          "displayFps": 59.47562048678506,
+          "p95FrameMs": 16.800000000000182,
+          "ticks": 901.5
+        }
+      }
+    }
+  },
+  "overall": {
+    "A": {
+      "simulationTps": 52.00792760442644,
+      "uniqueWorldFrameFps": 37.59905142094019,
+      "displayFps": 37.77311389621095,
+      "p95FrameMs": 52.20000000000039,
+      "ticks": 784.125
+    },
+    "B": {
+      "simulationTps": 54.687957135839945,
+      "uniqueWorldFrameFps": 43.20103912413227,
+      "displayFps": 43.342039954027214,
+      "p95FrameMs": 45.94999999999979,
+      "ticks": 824.125
+    },
+    "C": {
+      "simulationTps": 51.090393049754674,
+      "uniqueWorldFrameFps": 28.640972619480316,
+      "displayFps": 59.85295159125726,
+      "p95FrameMs": 16.800000000000182,
+      "ticks": 773.25
+    },
+    "D": {
+      "simulationTps": 54.164268819018865,
+      "uniqueWorldFrameFps": 36.30525984281297,
+      "displayFps": 59.77655267800028,
+      "p95FrameMs": 16.800000000000182,
+      "ticks": 819
+    }
+  },
+  "changesVsA": {
+    "B": {
+      "simulationTps": 5.153117332030366,
+      "uniqueWorldFrameFps": 14.899279347436245,
+      "displayFps": 14.74309497786701,
+      "p95FrameMsImprovement": 11.973180076629408
+    },
+    "C": {
+      "simulationTps": -1.7642205658540355,
+      "uniqueWorldFrameFps": -23.82527873155549,
+      "displayFps": 58.45384565253211,
+      "p95FrameMsImprovement": 67.81609195402287
+    },
+    "D": {
+      "simulationTps": 4.146177926937611,
+      "uniqueWorldFrameFps": -3.44102185888302,
+      "displayFps": 58.25158826526216,
+      "p95FrameMsImprovement": 67.81609195402287
+    }
+  },
+  "caveats": [
+    "Per-scene values are means of two runs; the overall values weight the four scenes equally.",
+    "p95 is the mean of each run p95, not a percentile pooled from raw frame intervals.",
+    "World-frame FPS counts world canvas image updates observed by the harness; display FPS counts requestAnimationFrame callbacks. Neither is a physical compositor scanout counter.",
+    "Resource telemetry was disabled in this short run; per-application CPU/GPU/memory comparisons are unavailable."
+  ]
+}

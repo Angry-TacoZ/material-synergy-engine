@@ -1,0 +1,80 @@
+{
+  "createdAt": "2026-10-08T09:16:27.693Z",
+  "scenario": "Write one Sand cell directly into public Simulation.cells, then step eight ticks.",
+  "firstDivergentTick": 1,
+  "variants": {
+    "A": {
+      "start": 80,
+      "positions": [
+        336
+      ],
+      "trace": [
+        [
+          80
+        ],
+        [
+          112
+        ],
+        [
+          144
+        ],
+        [
+          176
+        ],
+        [
+          208
+        ],
+        [
+          240
+        ],
+        [
+          272
+        ],
+        [
+          304
+        ],
+        [
+          336
+        ]
+      ],
+      "ticks": 8
+    },
+    "B": {
+      "start": 80,
+      "positions": [
+        80
+      ],
+      "trace": [
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ],
+        [
+          80
+        ]
+      ],
+      "ticks": 8
+    }
+  },
+  "equivalent": false
+}

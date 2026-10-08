@@ -1,0 +1,365 @@
+{
+  "createdAt": "2026-10-08T09:12:40.774Z",
+  "width": 960,
+  "height": 576,
+  "seed": 42,
+  "commits": {
+    "A": "e32546a130b93288ca67bf427f035d5aff70d9ff",
+    "B": "89d3c9fbd62b95bd4d7102bd71e020b93186407a",
+    "C": "6fdbcc915ef61cfc42d2358e3cd8a6a6df6bfd01",
+    "D": "8edf80c802050502acfa84ca14f9154ea9b51566"
+  },
+  "workloadCount": 4,
+  "workloads": [
+    {
+      "workload": "empty",
+      "width": 960,
+      "height": 576,
+      "seed": 42,
+      "ticks": 120,
+      "configHashes": {
+        "A": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "B": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "C": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "D": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b"
+      },
+      "initialDifferences": [],
+      "firstDivergences": [],
+      "indexDifferences": [],
+      "elapsedMs": 1721.9803000000002,
+      "finalTicks": {
+        "A": 120,
+        "B": 120,
+        "C": 120,
+        "D": 120
+      },
+      "finalCounts": {
+        "A": {},
+        "B": {},
+        "C": {},
+        "D": {}
+      },
+      "finalReactions": {
+        "A": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "B": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "C": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "D": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        }
+      }
+    },
+    {
+      "workload": "fire",
+      "width": 960,
+      "height": 576,
+      "seed": 42,
+      "ticks": 120,
+      "configHashes": {
+        "A": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "B": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "C": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "D": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b"
+      },
+      "initialDifferences": [],
+      "firstDivergences": [],
+      "indexDifferences": [],
+      "elapsedMs": 17495.1791,
+      "finalTicks": {
+        "A": 120,
+        "B": 120,
+        "C": 120,
+        "D": 120
+      },
+      "finalCounts": {
+        "A": {
+          "Fire": 990,
+          "Smoke": 7400,
+          "Lava": 3840,
+          "Wood": 60610,
+          "Stone": 10240
+        },
+        "B": {
+          "Fire": 990,
+          "Smoke": 7400,
+          "Lava": 3840,
+          "Wood": 60610,
+          "Stone": 10240
+        },
+        "C": {
+          "Fire": 990,
+          "Smoke": 7400,
+          "Lava": 3840,
+          "Wood": 60610,
+          "Stone": 10240
+        },
+        "D": {
+          "Fire": 990,
+          "Smoke": 7400,
+          "Lava": 3840,
+          "Wood": 60610,
+          "Stone": 10240
+        }
+      },
+      "finalReactions": {
+        "A": {
+          "ignition": 990,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "B": {
+          "ignition": 990,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "C": {
+          "ignition": 990,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "D": {
+          "ignition": 990,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        }
+      }
+    },
+    {
+      "workload": "float",
+      "width": 960,
+      "height": 576,
+      "seed": 42,
+      "ticks": 120,
+      "configHashes": {
+        "A": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "B": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "C": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "D": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b"
+      },
+      "initialDifferences": [],
+      "firstDivergences": [],
+      "indexDifferences": [],
+      "elapsedMs": 45449.9391,
+      "finalTicks": {
+        "A": 120,
+        "B": 120,
+        "C": 120,
+        "D": 120
+      },
+      "finalCounts": {
+        "A": {
+          "Stone": 22784,
+          "Water": 153600,
+          "Ice": 5120,
+          "Wood": 4608,
+          "Glass": 4096
+        },
+        "B": {
+          "Stone": 22784,
+          "Water": 153600,
+          "Ice": 5120,
+          "Wood": 4608,
+          "Glass": 4096
+        },
+        "C": {
+          "Stone": 22784,
+          "Water": 153600,
+          "Ice": 5120,
+          "Wood": 4608,
+          "Glass": 4096
+        },
+        "D": {
+          "Stone": 22784,
+          "Water": 153600,
+          "Ice": 5120,
+          "Wood": 4608,
+          "Glass": 4096
+        }
+      },
+      "finalReactions": {
+        "A": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "B": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "C": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        },
+        "D": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 0,
+          "shattering": 0
+        }
+      }
+    },
+    {
+      "workload": "stress",
+      "width": 960,
+      "height": 576,
+      "seed": 42,
+      "ticks": 120,
+      "configHashes": {
+        "A": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "B": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "C": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b",
+        "D": "b9310331166efabd3164ac2d86aeefc0c9008681f96035238dd44ce3fea7ed0b"
+      },
+      "initialDifferences": [],
+      "firstDivergences": [],
+      "indexDifferences": [],
+      "elapsedMs": 10161.450099999995,
+      "finalTicks": {
+        "A": 120,
+        "B": 120,
+        "C": 120,
+        "D": 120
+      },
+      "finalCounts": {
+        "A": {
+          "Concrete": 14528,
+          "Rubble": 512,
+          "Stone": 12800
+        },
+        "B": {
+          "Concrete": 14528,
+          "Rubble": 512,
+          "Stone": 12800
+        },
+        "C": {
+          "Concrete": 14528,
+          "Rubble": 512,
+          "Stone": 12800
+        },
+        "D": {
+          "Concrete": 14528,
+          "Rubble": 512,
+          "Stone": 12800
+        }
+      },
+      "finalReactions": {
+        "A": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 512,
+          "shattering": 0
+        },
+        "B": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 512,
+          "shattering": 0
+        },
+        "C": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 512,
+          "shattering": 0
+        },
+        "D": {
+          "ignition": 0,
+          "cooling": 0,
+          "melting": 0,
+          "glass": 0,
+          "dissolving": 0,
+          "erosion": 0,
+          "fracture": 512,
+          "shattering": 0
+        }
+      }
+    }
+  ],
+  "exactAgreement": true,
+  "scope": "Direct deterministic engine replay across all four commits. Worker protocol is evaluated separately in the browser harness."
+}
