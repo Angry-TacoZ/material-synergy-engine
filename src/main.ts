@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { materials, M } from './simulation';
 import { ParticleWorkerClient } from './particle-worker-client';
 import type { ParticleInspection } from './particle-worker-protocol';
+import { registerParticleWorkerPagehideCleanup } from './particle-worker-lifecycle';
 import { panBy, screenToWorld, zoomAt, type Point, type Viewport } from './demo/viewport';
 import './style.css';
 
@@ -91,7 +92,7 @@ function reportWorkerError(error: unknown) {
   document.querySelectorAll<HTMLInputElement | HTMLSelectElement>('#brush, #speed').forEach(control => { control.disabled = true; });
 }
 sim.setFailureHandler(reportWorkerError);
-window.addEventListener('pagehide', () => sim.dispose(), { once: true });
+registerParticleWorkerPagehideCleanup(() => sim.dispose());
 async function updateStats() {
   const state = await sim.inspect(cursor.x, cursor.y);
   latestInspection = state;
