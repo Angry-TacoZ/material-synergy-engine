@@ -70,7 +70,8 @@ test('Particle Lab grass and wood ignite across separate air gaps', () => {
   }
   assert.ok(s.reactions.ignition > 0);
   assert.ok((s.counts().Grass ?? 0) < grass, 'grass heats and ignites');
-  assert.ok((s.counts().Wood ?? 0) < wood, 'wood heats and ignites');
+  assert.equal(s.counts().Wood, wood, 'ignition preserves solid wood');
+  assert.ok(s.burning.some((burning, i) => burning > 0 && s.getCell(i) === M.Wood), 'wood burns in place');
   for (let y = 122; y < 136; y++) {
     assert.notEqual(s.cells[y * s.width + 67], M.Lava);
     assert.notEqual(s.cells[y * s.width + 172], M.Lava);

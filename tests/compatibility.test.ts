@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { Simulation } from '../src/engine/index.ts';
-import { labConfig } from '../src/demo/materials.ts';
+import type { WorldConfig } from '../src/engine/config.ts';
+const labConfig: WorldConfig = JSON.parse(readFileSync(new URL('./fixtures/legacy-lab-config.json', import.meta.url), 'utf8'));
 import { loadScene } from '../src/demo/scenes.ts';
 
 // Captured before the config migration. Do not regenerate to accept regressions.

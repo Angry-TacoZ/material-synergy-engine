@@ -37,6 +37,7 @@ const ignitionButton = document.createElement('button'); ignitionButton.dataset.
 const tipButton = document.createElement('button'); tipButton.dataset.scene = 'tip'; tipButton.innerHTML = 'Tip a beam <span>↗</span>'; document.querySelector('.examples')!.append(tipButton);
 const stressButton = document.createElement('button'); stressButton.dataset.scene = 'stress'; stressButton.innerHTML = 'Concrete stress <span>↗</span>'; document.querySelector('.examples')!.append(stressButton);
 const shatterButton = document.createElement('button'); shatterButton.dataset.scene = 'shatter'; shatterButton.innerHTML = 'Shatter glass <span>↗</span>'; document.querySelector('.examples')!.append(shatterButton);
+const burnButton = document.createElement('button'); burnButton.dataset.scene = 'burn-tree'; burnButton.innerHTML = 'Burn a tree <span>↗</span>'; document.querySelector('.examples')!.append(burnButton);
 const firButton = document.createElement('button'); firButton.dataset.scene = 'fir'; firButton.innerHTML = 'Fir tree <span>↗</span>'; document.querySelector('.examples')!.append(firButton);
 let filter = 'All';
 function palette() {

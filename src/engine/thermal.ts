@@ -19,11 +19,11 @@ export class ThermalField {
   wake() { this.active = true; }
   clear() { this.heat.fill(0); this.next.fill(0); this.sources.fill(0); this.active = false; }
   at(x: number, y: number) { return this.heat[Math.floor(y / HEAT_CELL) * this.width + Math.floor(x / HEAT_CELL)]; }
-  update(cells: Uint8Array, temperatures: Float32Array, width: number, materials: readonly MaterialDefinition[]): boolean {
+  update(cells: Uint8Array, temperatures: Float32Array, width: number, materials: readonly MaterialDefinition[], burning?: Float32Array): boolean {
     if (!this.active) return false;
     this.sources.fill(0);
     for (let i = 0; i < cells.length; i++) {
-      if (!materials[cells[i]].thermal.source) continue;
+      if (!materials[cells[i]].thermal.source && !burning?.[i]) continue;
       const bin = Math.floor(Math.floor(i / width) / HEAT_CELL) * this.width + Math.floor((i % width) / HEAT_CELL);
       this.sources[bin] = Math.max(this.sources[bin], temperatures[i]);
     }

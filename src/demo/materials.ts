@@ -72,8 +72,8 @@ export const materials = [
     "formula": "Organic",
     "description": "Connected wood moves as one piece and floats in water. Sustained heat can ignite it across a gap; acid erodes it cell by cell.",
     "reactions": [
-      "Wood + lava / fire → fire",
-      "Wood held near 650 °F → fire",
+      "Wood + sustained heat → charring + flames",
+      "Wood above 650 °F for 1.5 s → ignition",
       "Acid erodes wood cell by cell"
     ],
     "key": "wood",
@@ -82,12 +82,12 @@ export const materials = [
       "capacity": 2,
       "conductivity": 0.02,
       "airTransfer": 0.16,
-      "source": false,
-      "flammability": {
-        "output": "fire"
-      },
-      "heatIgnition": { "point": 343.5, "holdTicks": 45, "output": "fire", "counter": "ignition" }
-    }
+      "source": false
+    },
+    combustion: { ignitionPoint: 343.5, exposureTicks: 90, extinctionPoint: 180,
+      fuelLoad: 1, burnRate: .00065, heatRelease: 42000, flameTemperature: 880,
+      flame: 'fire', flameChance: .55, smoke: 'smoke', smokeChance: .10, residue: 'ash', residueChance: .4,
+      remainingMass: .30, extinguishers: ['water', 'saltwater'], counter: 'ignition' }
   },
   {
     "name": "Stone",
@@ -122,7 +122,7 @@ export const materials = [
     "formula": "Molten rock",
     "description": "Hot molten rock flows slowly. It ignites fuel and cools when it meets water.",
     "reactions": [
-      "Lava + wood → fire",
+      "Lava gradually heats and ignites wood",
       "Lava + water → stone + steam",
       "Lava + sand → glass"
     ],
@@ -145,9 +145,9 @@ export const materials = [
     "group": "Energy",
     "state": "Gas",
     "formula": "Combustion",
-    "description": "Rises, spreads through fuel, and eventually burns out. Water extinguishes it.",
+    "description": "Short-lived hot gas rises and flickers. Burning fuel replenishes flames; flames leave no ash. Water extinguishes it.",
     "reactions": [
-      "Fire + wood / oil → fire",
+      "Fire heats nearby fuel",
       "Fire + ice → water"
     ],
     "key": "fire",
@@ -158,15 +158,8 @@ export const materials = [
       "airTransfer": 0.16,
       "source": true
     },
-    "lifetime": {
-      "min": 160,
-      "range": 200,
-      "output": "ash",
-      "spawnAbove": {
-        "chance": 0.08,
-        "output": "smoke"
-      }
-    }
+    "lifetime": { "min": 28, "range": 28, "output": "empty" },
+    "motion": { "pauseChance": .3, "diagonalFirstChance": .65 }
   },
   {
     "name": "Oil",
@@ -175,9 +168,9 @@ export const materials = [
     "group": "Liquids",
     "state": "Liquid",
     "formula": "Hydrocarbons",
-    "description": "Flows and floats on water. Ignites when it touches fire or lava.",
+    "description": "Flows and floats on water. Sustained heat ignites its exposed surface; burning oil produces sooty smoke.",
     "reactions": [
-      "Oil + fire / lava → fire",
+      "Hot oil → flames + dark smoke",
       "Oil floats on water"
     ],
     "key": "oil",
@@ -186,11 +179,12 @@ export const materials = [
       "capacity": 1,
       "conductivity": 0.12,
       "airTransfer": 0.16,
-      "source": false,
-      "flammability": {
-        "output": "fire"
-      }
-    }
+      "source": false
+    },
+    combustion: { ignitionPoint: 250, exposureTicks: 18, extinctionPoint: 120,
+      fuelLoad: .7, burnRate: .0035, heatRelease: 32000, flameTemperature: 1050,
+      flame: 'fire', flameChance: .8, smoke: 'smoke', smokeChance: .22, residue: 'empty', residueChance: 0,
+      remainingMass: .15, extinguishers: ['water', 'saltwater'], counter: 'ignition' }
   },
   {
     "name": "Ice",
@@ -432,8 +426,8 @@ export const materials = [
     "formula": "Plant",
     "description": "Light grass bonds where its cells touch and floats in water. Sustained heat can ignite it across a gap; acid consumes exposed cells. It does not grow automatically.",
     "reactions": [
-      "Grass + fire / lava → fire",
-      "Grass held near 550 °F → fire",
+      "Grass + sustained heat → fast surface burning",
+      "Grass above 550 °F for 0.4 s → ignition",
       "Acid erodes grass cell by cell"
     ],
     "key": "grass",
@@ -442,12 +436,12 @@ export const materials = [
       "capacity": 2,
       "conductivity": 0.12,
       "airTransfer": 0.16,
-      "source": false,
-      "flammability": {
-        "output": "fire"
-      },
-      "heatIgnition": { "point": 287.8, "holdTicks": 18, "output": "fire", "counter": "ignition" }
-    }
+      "source": false
+    },
+    combustion: { ignitionPoint: 287.8, exposureTicks: 24, extinctionPoint: 140,
+      fuelLoad: .18, burnRate: .0018, heatRelease: 30000, flameTemperature: 760,
+      flame: 'fire', flameChance: .38, smoke: 'smoke', smokeChance: .07, residue: 'ash', residueChance: .15,
+      remainingMass: .20, extinguishers: ['water', 'saltwater'], counter: 'ignition' }
   },
   {
     "name": "Rubble",
@@ -498,7 +492,6 @@ export const M = { Empty: 0, Sand: 1, Water: 2, Wood: 3, Stone: 4, Lava: 5, Fire
 const contactRules: ReactionRule[] = [
   { inputs: { self: ['acid'], neighbor: ['wood','stone','concrete','grass'] }, outputs: [{ target: 'neighbor', material: 'empty' }, { target: 'self', material: 'empty' }], counter: 'erosion', stop: true },
   { inputs: { self: ['acid'], neighbor: ['ice'] }, outputs: [{ target: 'neighbor', material: 'water' }, { target: 'self', material: 'empty' }], counter: 'erosion', stop: true },
-  { inputs: { self: ['lava','fire'], neighbor: { flammable: true } }, outputs: [{ target: 'neighbor', material: '$flammability' }], counter: 'ignition' },
   { inputs: { self: ['lava','fire'], neighbor: ['ice'] }, outputs: [{ target: 'neighbor', material: 'water' }], counter: 'melting' },
   { inputs: { self: ['lava'], neighbor: ['water'] }, outputs: [{ target: 'self', material: 'stone' }, { target: 'neighbor', material: 'steam' }], counter: 'cooling', stop: true },
   { inputs: { self: ['lava'], neighbor: ['saltwater'] }, outputs: [{ target: 'self', material: 'stone' }, { target: 'neighbor', material: 'steam' }, { target: 'empty-neighbor', material: 'salt' }], counter: 'cooling', stop: true },
