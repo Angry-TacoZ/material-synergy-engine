@@ -6,7 +6,9 @@ import { MaterialRenderer } from '../src/rendering.ts';
 test('grass burns and concrete remains nonflammable', () => {
   for (const type of [M.Grass, M.Concrete]) {
     const s = new Simulation(20, 20); s.set(10, 19, M.Lava); s.set(11, 19, type); s.step();
-    assert.equal(s.cells[19 * 20 + 11], type === M.Grass ? M.Fire : M.Concrete);
+    assert.equal(s.cells[19 * 20 + 11], type, 'contact does not replace fuel');
+    for (let tick = 0; tick < 220; tick++) s.step();
+    assert.equal(s.reactions.ignition > 0, type === M.Grass);
   }
 });
 test('acid erodes grass and concrete', () => {
