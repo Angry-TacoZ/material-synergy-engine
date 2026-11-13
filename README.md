@@ -33,7 +33,7 @@ sim.set(11, 143, sim.materialId('solvent'));
 sim.step();
 ```
 
-Thermal config declares initial temperature, sustained source status, heat capacity, conductivity, exposed-air transfer, and optional phase-change point, heat budget, output and counter. Flammability declares the contact-combustion output; rules can select `{ flammable: true }` neighbors and emit `$flammability`. An optional `heatIgnition` definition adds a temperature point, required consecutive simulation ticks above that point, output, and counter. It works without contact with a heat source and resets its exposure when the material cools.
+Thermal config declares initial temperature, sustained source status, heat capacity, conductivity, exposed-air transfer, and optional phase-change point, heat budget, output and counter. Optional `combustion` data declares sustained ignition exposure, finite fuel, burn rate, heat release, gas emissions, residue, mass loss and extinguishing materials. Burning fuel retains its material identity. The older `flammability` and `heatIgnition` replacement behaviors remain available to other engine consumers, but cannot be combined with progressive combustion on one material. Particle Lab uses progressive combustion exclusively. See [combustion design and verification](docs/combustion.md).
 
 Failure config declares impact speed thresholds and stress compression/bending strengths, evaluation interval, section sampling radius, minimum body size, fracture budget, output and counter. Lifetimes, emissions, motion cadence and vapor drift are also data. Omitted behaviors are inactive. No callbacks or executable config are required.
 
@@ -67,7 +67,9 @@ Glass shatters into equal-density loose shards when its downward relative impact
 
 ## Heat transfer
 
-Lava and fire heat a separate coarse field that spreads and fades through nearby space. Particles carry temperature as they move. Adjacent matter conducts heat; exposed surfaces exchange heat with the surrounding field. Wood conducts more slowly than mineral materials, and water has a higher heat capacity. Ice starts at -10 model degrees, warms toward 0, then absorbs a finite melting-heat budget before changing into water. Dry-grass-like lab material ignites after 18 ticks above approximately 550 °F; wood requires 45 ticks above approximately 650 °F. Direct-contact reactions remain immediate.
+Lava and fire heat a separate coarse field that spreads and fades through nearby space. Particles carry temperature as they move. Adjacent matter conducts heat; exposed surfaces exchange heat with the surrounding field. Wood conducts more slowly than mineral materials, and water has a higher heat capacity. Ice starts at -10 model degrees, warms toward 0, then absorbs a finite melting-heat budget before changing into water. Dry-grass-like lab material requires 24 consecutive ticks above approximately 550 °F; wood requires 90 ticks above approximately 650 °F. Oil requires 18 ticks above 482 °F. Direct contact heats fuel without replacing it. Wood chars and loses mass while remaining a connected solid; exhausted sections become ash and release unsupported branches. Water and saltwater quench neighboring fuel, retaining its remaining fuel and char.
+
+Try **Burn a tree** for a repeatable localized ignition at a contained ember bed below the fir. **Fir tree** remains the unlit control.
 
 Try **Heat across a gap**: glass walls keep lava away from the ice. The nearby block melts from its exposed edges while the distant block stays cold. Try **Ignite across a gap** to compare grass and wood heated without contact. Point the brush at air or matter to inspect temperature. Clear resets particles, temperature, and residual heat.
 
@@ -79,7 +81,7 @@ Every material has a representative model density. Each equal-volume cell has ma
 
 Heavier liquids settle beneath lighter liquids. Wood and ice float partially submerged; stone and glass sink. All solid masses share the same free-fall acceleration. Displaced-liquid mass provides buoyancy, fluid drag slows motion, and supported cargo contributes to a piece's load. Small loads can rise with a wooden raft; sufficiently heavy loads sink it. Body weight and downward momentum determine whether a piece can nudge loose powder sideways. Collision and movement preserve particle counts; cleared scenes reset momentum.
 
-Density values are nominal game parameters rather than temperature-dependent measurements. Buoyancy estimates immersion from fluid alongside solid row segments; load sharing and powder resistance are approximations. There is no physical length scale, kilogram mass, full pressure solver, or general rigid-body dynamics. Chemical reactions and phase changes still replace fixed-volume cells and do not conserve physical mass.
+Density values are nominal game parameters rather than temperature-dependent measurements. Buoyancy estimates immersion from fluid alongside solid row segments; load sharing and powder resistance are approximations. There is no physical length scale, kilogram mass, full pressure solver, or general rigid-body dynamics. Combustion reduces connected-body mass progressively toward the configured remaining-mass fraction. Exhaustion replaces the cell with its configured residue. Other chemical reactions and phase changes still replace fixed-volume cells. Emission/residue counts do not conserve physical mass.
 
 ## Run
 
@@ -102,4 +104,4 @@ Runs deterministic simulation tests, TypeScript checking, and the production bui
 
 ## Scope
 
-This is a game with simplified material rules, not a scientific chemistry simulator. Reactions combine adjacency, approximate thermal ice melting, and finite particle lifetimes, without oxygen, pressure, or energy conservation. Fire can rise away from fuel. No accounts, servers, paid APIs, or external persistence are used. Scenes are not saved across reloads. Fonts use Google Fonts with local fallbacks.
+This is a game with simplified material rules, not a scientific chemistry simulator. Reactions combine adjacency, approximate thermal ice melting, and finite particle lifetimes, without oxygen, pressure, or energy conservation. Short-lived flame gas rises away from burning fuel; procedural flame tongues stay rooted at active surfaces. Flames expire into empty space, while ash comes only from consumed fuel. No accounts, servers, paid APIs, or external persistence are used. Scenes are not saved across reloads. Fonts use Google Fonts with local fallbacks.

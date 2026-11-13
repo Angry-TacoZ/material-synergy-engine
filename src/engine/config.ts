@@ -1,6 +1,13 @@
 export type State = 'Empty' | 'Solid' | 'Liquid' | 'Gas' | 'Powder';
 export type Transition = { output: string; counter?: string };
 export type StressFailure = Transition & { compression: number; bending: number; interval: number; minCells: number; sectionRadius: number; limit: number; fraction: number };
+/** Authored 60 Hz game units. Emission probabilities apply at the 20 Hz thermal cadence. */
+export type Combustion = {
+  ignitionPoint: number; exposureTicks: number; extinctionPoint: number;
+  fuelLoad: number; burnRate: number; heatRelease: number; flameTemperature: number;
+  flame: string; flameChance: number; smoke: string; smokeChance: number; residue: string; residueChance: number;
+  remainingMass: number; extinguishers: readonly string[]; counter?: string;
+};
 export type MaterialDefinition = {
   key: string; name: string; state: State; density: number;
   thermal: { initialTemperature: number; capacity: number; conductivity: number; airTransfer: number; source?: boolean;
@@ -10,6 +17,7 @@ export type MaterialDefinition = {
   collision?: { hard: boolean };
   failure?: { impact?: Transition & { minRelativeSpeed: number }; stress?: StressFailure };
   displaceWhenTrapped?: boolean;
+  combustion?: Combustion;
 };
 export type Selector = readonly string[] | { flammable: true };
 export type ReactionRule = {
@@ -39,6 +47,17 @@ export function compileConfig(input: WorldConfig) {
     finite(m.thermal.capacity, 'capacity', Number.MIN_VALUE); finite(m.thermal.conductivity, 'conductivity'); finite(m.thermal.airTransfer, 'air transfer');
     if (m.thermal.phaseChange) { finite(m.thermal.phaseChange.point, 'phase point', -Infinity); finite(m.thermal.phaseChange.heat, 'phase heat', Number.MIN_VALUE); }
     if (m.thermal.heatIgnition) { finite(m.thermal.heatIgnition.point, 'ignition point', -Infinity); if (!Number.isInteger(m.thermal.heatIgnition.holdTicks) || m.thermal.heatIgnition.holdTicks < 1 || m.thermal.heatIgnition.holdTicks > 65535) throw new Error('Invalid ignition hold ticks'); }
+    const burn = m.combustion;
+    if (burn) {
+      if (m.state === 'Empty' || m.thermal.heatIgnition || m.thermal.flammability) throw new Error('Combustion cannot coexist with replacement ignition');
+      for (const value of [burn.ignitionPoint, burn.extinctionPoint, burn.flameTemperature]) finite(value, 'combustion temperature');
+      if (burn.extinctionPoint >= burn.ignitionPoint || burn.flameTemperature <= burn.ignitionPoint) throw new Error('Invalid combustion temperature range');
+      for (const value of [burn.fuelLoad, burn.burnRate, burn.heatRelease]) finite(value, 'combustion fuel/heat', Number.MIN_VALUE);
+      if (!Number.isInteger(burn.exposureTicks) || burn.exposureTicks < 1 || burn.exposureTicks > 65535) throw new Error('Invalid combustion exposure');
+      for (const value of [burn.flameChance, burn.smokeChance, burn.residueChance, burn.remainingMass]) finite(value, 'combustion fraction');
+      probability(burn.flameChance); probability(burn.smokeChance); probability(burn.residueChance); probability(burn.remainingMass);
+      if (burn.remainingMass <= 0) throw new Error('Invalid remaining mass');
+    }
     if (m.lifetime) { for (const v of [m.lifetime.min, m.lifetime.range]) if (!Number.isInteger(v) || v < 0) throw new Error('Invalid lifetime'); if (m.lifetime.min + m.lifetime.range > 65535) throw new Error('Lifetime exceeds storage'); probability(m.lifetime.spawnAbove?.chance); }
     probability(m.motion?.pauseChance); probability(m.motion?.diagonalFirstChance);
     if (m.motion?.stepEvery !== undefined && (!Number.isInteger(m.motion.stepEvery) || m.motion.stepEvery < 1)) throw new Error('Invalid motion interval');
@@ -50,6 +69,13 @@ export function compileConfig(input: WorldConfig) {
   const counters = new Set(config.counters);
   for (const m of materials) for (const t of [m.thermal.flammability, m.thermal.heatIgnition, m.thermal.phaseChange, m.lifetime, m.failure?.impact, m.failure?.stress]) if (t) { materialId(t.output); if (t.counter) counters.add(t.counter); }
   for (const m of materials) if (m.lifetime?.spawnAbove) materialId(m.lifetime.spawnAbove.output);
+  for (const m of materials) if (m.combustion) {
+    const burn = m.combustion;
+    for (const key of [burn.flame, burn.smoke, burn.residue, ...burn.extinguishers]) materialId(key);
+    for (const key of [burn.flame, burn.smoke]) if (materials[materialId(key)].state !== 'Gas') throw new Error('Combustion emissions must be gases');
+    if (burn.residue === m.key) throw new Error('Combustion residue must differ from fuel');
+    if (burn.counter) counters.add(burn.counter);
+  }
   const matches = (selector: Selector) => {
     if (Array.isArray(selector)) return selector.map(materialId);
     if (!selector || !('flammable' in selector) || selector.flammable !== true) throw new Error('Invalid reaction selector');

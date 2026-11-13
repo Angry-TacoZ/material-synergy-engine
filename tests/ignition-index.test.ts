@@ -19,7 +19,7 @@ function assertIgnitionIndex(sim: EngineSimulation) {
   const occupied = new Uint32Array(sim.height * index.rowWordCount);
   for (let cell = 0; cell < sim.cells.length; cell++) {
     const x = cell % sim.width, y = Math.floor(cell / sim.width), bit = 1 << (x & 31);
-    if (sim.materials[sim.cells[cell]].thermal.heatIgnition) expected[cell >>> 5] |= 1 << (cell & 31);
+    if (sim.materials[sim.cells[cell]].thermal.heatIgnition || sim.materials[sim.cells[cell]].combustion) expected[cell >>> 5] |= 1 << (cell & 31);
     if (sim.cells[cell]) occupied[y * index.rowWordCount + (x >>> 5)] |= bit;
   }
   assert.deepEqual(index.ignitionBits, expected, 'ignitable-material bitmap');

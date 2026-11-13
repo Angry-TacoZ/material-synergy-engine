@@ -6,14 +6,17 @@ test('higher-resolution presets preserve layout and ignite wood', () => {
   const base = new Simulation(), fine = new Simulation(960, 576);
   base.load('fire'); fine.load('fire');
   assert.equal(fine.counts().Wood, base.counts().Wood * 16);
-  fine.step(); assert.ok(fine.reactions.ignition > 0);
+  fine.step(); assert.equal(fine.reactions.ignition, 0);
+  for (let tick = 0; tick < 900; tick++) fine.step();
+  assert.ok(fine.reactions.ignition > 0);
   fine.load('empty'); assert.deepEqual(fine.counts(), {});
 });
 
 test('lava ignites wood, and the fire spreads through fuel', () => {
   const s = new Simulation(20, 20); s.set(10, 19, M.Lava); s.set(11, 19, M.Wood); s.set(12, 19, M.Wood);
-  s.step(); assert.ok(s.reactions.ignition >= 1); assert.equal(s.cells[19 * 20 + 11], M.Fire);
-  for (let i = 0; i < 10; i++) s.step(); assert.ok(s.reactions.ignition >= 2);
+  s.step(); assert.equal(s.reactions.ignition, 0); assert.equal(s.cells[19 * 20 + 11], M.Wood);
+  for (let i = 0; i < 400; i++) s.step(); assert.ok(s.reactions.ignition >= 2);
+  assert.equal(s.counts().Wood, 2);
 });
 test('water cools lava into stone and steam', () => {
   const s = new Simulation(20, 20); s.set(10, 19, M.Lava); s.set(11, 19, M.Water); s.step();
@@ -30,7 +33,8 @@ test('salt dissolves into water', () => {
 test('water extinguishes fire and oil ignites', () => {
   const s = new Simulation(20, 20); s.set(10, 19, M.Fire); s.set(11, 19, M.Water); s.step();
   assert.equal(s.counts().Fire, undefined); assert.equal(s.counts().Steam, 1);
-  s.clear(); s.set(10, 19, M.Lava); s.set(11, 19, M.Oil); s.step(); assert.equal(s.reactions.ignition, 1);
+  s.clear(); s.set(10, 19, M.Lava); s.set(11, 19, M.Oil); s.step(); assert.equal(s.reactions.ignition, 0);
+  for (let i = 0; i < 180; i++) s.step(); assert.ok(s.reactions.ignition > 0);
 });
 test('water settles below oil, and trapped steam condenses', () => {
   const s = new Simulation(5, 5); s.set(2, 3, M.Water); s.set(2, 4, M.Oil); s.step(); assert.equal(s.cells[4 * 5 + 2], M.Water);

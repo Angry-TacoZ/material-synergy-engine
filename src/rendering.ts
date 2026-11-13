@@ -28,6 +28,9 @@ export class MaterialRenderer {
   private lightBounds = { left: 0, right: -1, top: 0, bottom: -1 };
   private sky: Uint8ClampedArray;
   private cells: Uint8Array;
+  private flameBins: Uint8Array;
+  private flameAnchors: Uint32Array;
+  private flameCount = 0;
   private solid = new Uint8Array(materials.length);
 
   constructor(private width: number, private height: number) {
@@ -38,6 +41,8 @@ export class MaterialRenderer {
     this.backgroundImage = new Uint8ClampedArray(width * height * 4);
     this.sky = new Uint8ClampedArray(height * 3);
     this.cells = new Uint8Array(width * height);
+    this.flameBins = new Uint8Array(Math.ceil(width / 4) * Math.ceil(height / 4));
+    this.flameAnchors = new Uint32Array(this.flameBins.length);
     for (let t = 0; t < materials.length; t++) if (materials[t].state === 'Solid') this.solid[t] = 1;
     for (let y = 0; y < height; y++) {
       this.sky[y * 3] = 18 + y / height * 8; this.sky[y * 3 + 1] = 27 + y / height * 11; this.sky[y * 3 + 2] = 36 + y / height * 14;
@@ -98,13 +103,13 @@ export class MaterialRenderer {
     }
   }
 
-  private updateLight(cells: Uint8Array) {
+  private updateLight(cells: Uint8Array, sim: Simulation, time: number) {
     this.emitters.fill(0);
     for (let y = 0; y < this.height; y++) for (let x = 0; x < this.width; x++) {
       const t = cells[y * this.width + x];
-      if (t === M.Lava || t === M.Fire) {
+      if (t === M.Lava || t === M.Fire || sim.burning[y * this.width + x]) {
         const i = (y >> 3) * this.lightWidth + (x >> 3);
-        this.emitters[i] = Math.min(1, this.emitters[i] + (t === M.Lava ? .09 : .07));
+        this.emitters[i] = Math.min(1, this.emitters[i] + (t === M.Lava ? .09 : (.04 + .06 * sim.burning[y * this.width + x]) * (.8 + .2 * Math.sin(time * .21 + x * .8 + y))));
       }
     }
     let left = this.lightWidth, right = -1, top = this.lightHeight, bottom = -1;
@@ -138,15 +143,20 @@ export class MaterialRenderer {
     }
   }
 
-  render(image: ImageData, sim: Simulation) {
+  render(image: ImageData, sim: Simulation, time = sim.ticks) {
     sim.copyCellsTo(this.cells);
-    this.updateLight(this.cells);
+    this.updateLight(this.cells, sim, time);
     const pixels = image.data, cells = this.cells, w = this.width;
     pixels.set(this.backgroundImage);
+    this.flameCount = 0; this.flameBins.fill(0);
     const bounds = this.lightBounds;
     const empty = (t: number) => t === M.Empty || t === M.Steam || t === M.Smoke;
     for (let y = 0; y < this.height; y++) for (let x = 0; x < w; x++) {
       const i = y * w + x, t = cells[i], p = i * 4, bg = i * 3;
+      if (sim.burning[i] || t === M.Fire) {
+        const bin = (y >> 2) * Math.ceil(w / 4) + (x >> 2);
+        if (!this.flameBins[bin]) { this.flameBins[bin] = 1; this.flameAnchors[this.flameCount++] = i; }
+      }
       let glow = 0;
       if (x >= bounds.left && x <= bounds.right && y >= bounds.top && y <= bounds.bottom) {
         const lx = Math.min(this.lightWidth - 2, x >> 3), ly = Math.min(this.lightHeight - 2, y >> 3), li = ly * this.lightWidth + lx;
@@ -187,11 +197,70 @@ export class MaterialRenderer {
           if (t === M.Water || t === M.Saltwater) { r = r * .87 + this.background[bg] * .13; g = g * .87 + this.background[bg + 1] * .13; b = b * .87 + this.background[bg + 2] * .13; }
         }
         if (t === M.Ice || t === M.Glass) { const alpha = t === M.Ice ? .78 : .55; r = r * alpha + this.background[bg] * (1 - alpha); g = g * alpha + this.background[bg + 1] * (1 - alpha); b = b * alpha + this.background[bg + 2] * (1 - alpha); if (empty(above)) { r += 65; g += 70; b += 75; } }
-        if (t === M.Lava || t === M.Fire) { r /= shade; g /= shade; b /= shade; if (t === M.Fire) { const age = clamp(sim.life[i] / 210); g = 70 + age * 180; b = age * 115; } }
+        const burn = sim.materials[t].combustion;
+        if (burn) {
+          const char = clamp((1 - sim.fuel[i] / burn.fuelLoad) * 2.4);
+          r *= 1 - char * .83; g *= 1 - char * .88; b *= 1 - char * .84;
+          if (sim.burning[i]) { const ember = sim.burning[i] * (.4 + .6 * hash(uv & 65535, uv >>> 16)); r += ember * 95; g += ember * 17; }
+        }
+        if (t === M.Lava) { r /= shade; g /= shade; b /= shade; }
+        if (t === M.Fire) {
+          const hot = clamp(sim.temperature[i] / 1100) * clamp(sim.life[i] / 28);
+          r = 230 + hot * 25; g = 45 + hot * 155; b = hot * hot * 80;
+        }
       }
       const gain = empty(t) ? 1 : .65;
       pixels[p] = r + glow * 155 * gain; pixels[p + 1] = g + glow * 69 * gain; pixels[p + 2] = b + glow * 15 * gain; pixels[p + 3] = 255;
     }
+    this.drawFlames(pixels, sim, time);
     return this.cells;
   }
+  /** Bounded raster tongues: at most one anchor per 4x4 region, no simulation RNG. */
+  private drawFlames(pixels: Uint8ClampedArray, sim: Simulation, time: number) {
+    const cells = this.cells;
+    for (let anchor = 0; anchor < this.flameCount; anchor++) {
+      const i = this.flameAnchors[anchor];
+      const burning = sim.burning[i], particle = cells[i] === M.Fire;
+      if (!burning && !particle) continue;
+      const x = i % this.width, y = Math.floor(i / this.width);
+      if (burning && y > 0 && this.solid[cells[i - this.width]] &&
+          (x === 0 || this.solid[cells[i - 1]]) && (x === this.width - 1 || this.solid[cells[i + 1]])) continue;
+
+      const seed = hash(sim.surfaceUV[i] & 65535, sim.surfaceUV[i] >>> 16);
+      const phase = time * .18 + seed * 41;
+      const flicker = .75 + .16 * Math.sin(phase) + .09 * Math.sin(phase * 2.31);
+      const origin = burning ? cells[i] : sim.emissionSource[i];
+      const oil = origin === M.Oil, grass = origin === M.Grass;
+      const intensity = burning || clamp(sim.life[i] / 35) * .35;
+      const height = Math.max(2, Math.round((burning ? 18 + intensity * (oil ? 90 : grass ? 65 : 80) : 4 + intensity * 13) * flicker));
+      const width = burning ? 3 + intensity * 4 : 1.3;
+      for (let dy = 0; dy < height && y - dy >= 0; dy++) {
+        const v = dy / height;
+        const center = x + Math.sin(phase - v * 5) * v * (3 + intensity * 4) + Math.sin(phase * .63 + v * 9) * v * 2;
+        const radius = width * (1 - v) * (.75 + .25 * Math.sin(phase + v * 12));
+        for (let xx = Math.max(0, Math.floor(center - radius)); xx <= Math.min(this.width - 1, Math.ceil(center + radius)); xx++) {
+          const target = (y - dy) * this.width + xx, t = cells[target];
+          if (t && t !== M.Fire && t !== M.Smoke && t !== M.Steam) continue;
+          const edge = Math.abs(xx - center) / Math.max(.5, radius);
+          // The tip intermittently forks; tapered edges carry the cooler red/orange.
+          if (v > .48 && Math.sin(phase * 1.4 + v * 11) > .4 && edge < .25) continue;
+          const hot = clamp((1 - v * .92 - edge * .45) * (sim.temperature[i] / 1000) + (oil ? .08 : grass ? -.08 : 0) + (seed > .8 && v < .2 ? .18 : 0));
+          const alpha = clamp((1 - edge * .65) * (1 - v * .65) * flicker);
+          const p = target * 4;
+          pixels[p] = pixels[p] * (1 - alpha) + (220 + hot * 35) * alpha;
+          pixels[p + 1] = pixels[p + 1] * (1 - alpha) + (35 + hot * 205) * alpha;
+          pixels[p + 2] = pixels[p + 2] * (1 - alpha) + (5 + hot ** 4 * 190) * alpha;
+        }
+      }
+      if (burning && seed > .86) {
+        const age = (time + seed * 93) % 80;
+        const ex = Math.round(x + Math.sin(seed * 20 + age * .08) * age * .12), ey = Math.round(y - age * .65);
+        if (age < 55 && ex >= 0 && ex < this.width && ey >= 0) {
+          const n = ey * this.width + ex;
+          if (!cells[n] || cells[n] === M.Smoke) { const p = n * 4; pixels[p] = 255; pixels[p + 1] = 175 - age * 2; pixels[p + 2] = 35; }
+        }
+      }
+    }
+  }
+
 }

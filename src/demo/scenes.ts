@@ -13,14 +13,16 @@ export function loadScene(sim: Simulation, preset: string) {
     if (preset === 'heat') { rect(25, 140, 190, 4, M.Stone); rect(44, 126, 1, 14, M.Glass); rect(80, 126, 1, 14, M.Glass); rect(45, 130, 35, 10, M.Lava); rect(85, 128, 35, 12, M.Ice); rect(170, 128, 25, 12, M.Ice); return; }
     if (preset === 'ignite') {
       rect(18, 136, 204, 8, M.Stone);
-      rect(35, 125, 28, 11, M.Lava); rect(63, 121, 2, 15, M.Glass); rect(61, 133, 6, 3, M.Glass); rect(68, 122, 22, 14, M.Grass);
-      rect(140, 125, 28, 11, M.Lava); rect(168, 121, 2, 15, M.Glass); rect(166, 133, 6, 3, M.Glass); rect(173, 122, 22, 14, M.Wood);
+      // Contain both sources; otherwise the right pool can flow left into the grass.
+      rect(34, 121, 1, 15, M.Stone); rect(139, 121, 1, 15, M.Stone);
+      rect(35, 125, 28, 11, M.Lava); rect(63, 121, 2, 15, M.Stone); rect(61, 133, 6, 3, M.Stone); rect(68, 122, 22, 14, M.Grass);
+      rect(140, 125, 28, 11, M.Lava); rect(168, 121, 2, 15, M.Stone); rect(166, 133, 6, 3, M.Stone); rect(173, 122, 22, 14, M.Wood);
       return;
     }
     if (preset === 'tip') { rect(20, 140, 200, 4, M.Concrete); rect(95, 100, 10, 40, M.Concrete); rect(95, 88, 50, 12, M.Wood); rect(40, 134, 20, 6, M.Grass); return; }
     if (preset === 'stress') { rect(20, 140, 200, 4, M.Stone); rect(118, 90, 2, 50, M.Concrete); rect(85, 78, 70, 12, M.Concrete); return; }
     if (preset === 'shatter') { rect(20, 140, 200, 4, M.Concrete); rect(45, 50, 18, 18, M.Glass); rect(145, 125, 40, 15, M.Glass); rect(150, 50, 18, 18, M.Glass); return; }
-    if (preset === 'fir') {
+    if (preset === 'fir' || preset === 'burn-tree') {
       rect(0, 135, 240, 9, M.Stone);
       rect(0, 133, 240, 2, M.Sand);
       // Three overlapping, irregular skirts give the crown a tapered fir silhouette.
@@ -57,6 +59,8 @@ export function loadScene(sim: Simulation, preset: string) {
           // Keep the lowest tip inside the crown so grass connects around it.
           woodLine(120, y + 2, 120 + reach * .66, y + (y === 117 ? 6 : 9), 1);
       }
+      // A small persistent ember bed heats only the left root/lowest bough.
+      if (preset === 'burn-tree') { rect(108, 132, 8, 4, M.Stone); rect(108, 129, 1, 3, M.Stone); rect(115, 129, 1, 3, M.Stone); rect(110, 130, 4, 2, M.Lava); }
       return;
     }
     for (let x = 0; x < sim.width; x++) {

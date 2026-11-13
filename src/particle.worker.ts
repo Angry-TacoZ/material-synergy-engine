@@ -26,7 +26,7 @@ let cursor = { x: 120, y: 50 };
 
 function render() {
   if (renderInFlight) return;
-  const cells = renderer.render(image, sim);
+  const cells = renderer.render(image, sim, paused ? sim.ticks : performance.now() / TICK_MS);
   vapor.data.fill(0);
   let hasVapor = false;
   for (let i = 0; i < cells.length; i++) {
@@ -34,10 +34,11 @@ function render() {
     if (type !== M.Steam && type !== M.Smoke) continue;
     hasVapor = true;
     const smoke = type === M.Smoke;
-    vapor.data[i * 4] = smoke ? 87 : 235;
-    vapor.data[i * 4 + 1] = smoke ? 97 : 244;
-    vapor.data[i * 4 + 2] = smoke ? 112 : 250;
-    vapor.data[i * 4 + 3] = (smoke ? 130 : 170) * Math.min(1, sim.life[i] / (smoke ? 100 : 180));
+    const soot = sim.emissionSource[i] === M.Oil, grass = sim.emissionSource[i] === M.Grass;
+    vapor.data[i * 4] = smoke ? (soot ? 40 : grass ? 115 : 91) : 235;
+    vapor.data[i * 4 + 1] = smoke ? (soot ? 38 : grass ? 119 : 87) : 244;
+    vapor.data[i * 4 + 2] = smoke ? (soot ? 36 : grass ? 109 : 82) : 250;
+    vapor.data[i * 4 + 3] = (smoke ? (soot ? 205 : 145) : 170) * Math.min(1, sim.life[i] / (smoke ? 100 : 180));
   }
   drawingContext.putImageData(image, 0, 0);
   if (hasVapor) {
